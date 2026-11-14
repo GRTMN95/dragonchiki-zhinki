@@ -9,16 +9,13 @@
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-title" content="Дракончики">
 <meta name="theme-color" content="#5e1228">
-<link rel="preconnect" href="https://fonts.googleapis.com">
-<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;600;700&family=Unbounded:wght@500;600&display=swap" rel="stylesheet">
 <style>
 /* Layout idea: one simple column. Big button on top, forecast cards, small calendar, history. */
 :root{
   --bg:#f6eef0; --surface:#fffafb; --ink:#2a1218; --muted:#70505a; --line:#e8d4d9;
   --period:#8a1b3a; --period-ink:#ffffff; --fert:#f1d5dc; --fert-ink:#5e1226;
   --ov:#d4a24c; --ov-ink:#2b1a00; --accent:#6d1129; --accent-ink:#ffffff;
-  --display:'Unbounded','Manrope',system-ui,sans-serif; --body:'Manrope',system-ui,-apple-system,'Segoe UI',sans-serif;
+  --display:-apple-system,BlinkMacSystemFont,'SF Pro Display','SF Pro Text','Helvetica Neue',system-ui,sans-serif; --body:-apple-system,BlinkMacSystemFont,'SF Pro Text','SF Pro Display','Helvetica Neue',system-ui,sans-serif;
   color-scheme:light;
 }
 @media (prefers-color-scheme: dark){
@@ -38,9 +35,9 @@ html,body{margin:0;padding:0}
 body{background:var(--bg);color:var(--ink);font-family:var(--body);font-size:16px;line-height:1.45;-webkit-text-size-adjust:100%}
 #root{max-width:520px;margin:0 auto;padding:20px 16px 48px;display:flex;flex-direction:column;gap:14px}
 h1,h2{margin:0;text-wrap:balance}
-h1{font-family:var(--display);font-weight:600;font-size:22px;line-height:1.2}
+h1{font-family:var(--display);font-weight:700;font-size:24px;line-height:1.15;letter-spacing:-.02em}
 .for{color:var(--accent);font-weight:700;margin-top:6px}
-h2{font-family:var(--display);font-weight:500;font-size:15px;margin-top:6px}
+h2{font-family:var(--display);font-weight:700;font-size:20px;letter-spacing:-.01em;margin-top:8px}
 .card{background:var(--surface);border:1px solid var(--line);border-radius:16px;padding:16px}
 .k{font-size:13px;color:var(--muted)}
 .big{font-size:22px;font-weight:700;font-variant-numeric:tabular-nums;margin-top:2px}
@@ -80,6 +77,28 @@ button:focus-visible,input:focus-visible{outline:3px solid var(--accent);outline
 .hist .edit input{flex:1;min-width:140px;background:var(--bg);border:1px solid var(--line);border-radius:10px;padding:8px;min-height:42px}
 .ok .row2{display:flex;flex-wrap:wrap;gap:8px;margin-top:8px}
 .foot{text-align:center;color:var(--accent);font-weight:700;margin-top:6px}
+
+
+/* living heart */
+.now{text-align:center;display:flex;flex-direction:column;align-items:center;gap:4px;padding-top:10px}
+.heartbox{width:min(250px,70vw);margin:0 auto}
+.heart{display:block;width:100%;height:auto;overflow:visible;animation:hbeat 3.2s ease-in-out infinite;transform-origin:50% 60%}
+@keyframes hbeat{0%,100%{transform:scale(1)}10%{transform:scale(1.035)}20%{transform:scale(1)}30%{transform:scale(1.025)}40%{transform:scale(1)}}
+.heart.fert{filter:drop-shadow(0 0 12px rgba(224,171,82,.65));animation:hbeat 3.2s ease-in-out infinite,hglow 2.4s ease-in-out infinite}
+@keyframes hglow{0%,100%{filter:drop-shadow(0 0 6px rgba(224,171,82,.35))}50%{filter:drop-shadow(0 0 18px rgba(224,171,82,.9))}}
+.hempty{fill:var(--fert);opacity:.6}
+.liq{transform:translateY(var(--to))}
+.liq.go{animation:fillup 2.6s cubic-bezier(.25,.8,.25,1) both}
+@keyframes fillup{from{transform:translateY(205px)}to{transform:translateY(var(--to))}}
+.wave{animation:wave 4.5s linear infinite}
+.wave.w2{animation-duration:7s;animation-direction:reverse}
+@keyframes wave{from{transform:translateX(0)}to{transform:translateX(-100px)}}
+.bub{fill:#fff;opacity:0;animation:bub 4.2s ease-in infinite}
+@keyframes bub{0%{transform:translateY(0);opacity:0}20%{opacity:.55}100%{transform:translateY(calc(var(--rise) * -1));opacity:0}}
+.ht1{font-size:14px;font-weight:700;letter-spacing:.14em;text-transform:uppercase}
+.ht2{font-family:var(--display);font-weight:700;font-size:50px;letter-spacing:-.02em}
+.ht1,.ht2{fill:var(--ink);stroke:var(--surface);stroke-width:5px;paint-order:stroke;stroke-linejoin:round;text-anchor:middle}
+.now .phase{font-family:var(--display);font-weight:700;font-size:20px;letter-spacing:-.01em}
 
 /* animation */
 body::before{content:"";position:fixed;inset:-20%;z-index:-1;pointer-events:none;background:radial-gradient(circle at 25% 15%,rgba(214,162,76,.16),transparent 45%),radial-gradient(circle at 80% 75%,rgba(138,27,58,.16),transparent 50%);animation:drift 18s ease-in-out infinite alternate}
@@ -126,7 +145,7 @@ var starts=[];
 try{var r=localStorage.getItem(KEY);if(r){var o=JSON.parse(r);if(Array.isArray(o)&&o.length)starts=o;}}catch(e){}
 function save(){try{localStorage.setItem(KEY,JSON.stringify(starts));}catch(e){}}
 
-var editing=null,deleting=null,firstRender=true,calAnim='';
+var heartAnim=true,editing=null,deleting=null,firstRender=true,calAnim='';
 var now=new Date(),calY=now.getFullYear(),calM=now.getMonth(),msg='',justAdded=null;
 var PL=5,LUT=14,DEF=28;
 
@@ -151,6 +170,24 @@ function calc(){
   return {T:T,s:s,lens:lens,L:L,last:last,period:period,pred:pred,fert:fert,ovs:ovs,rows:rows,cur:cur};
 }
 
+function heartSVG(day,L,mode,anim){
+  var HP='M100 176 C16 114 4 50 50 26 C77 13 98 30 100 52 C102 30 123 13 150 26 C196 50 184 114 100 176 Z';
+  var pct=Math.max(0.07,Math.min(1,day/L)),top=Math.round(176-pct*150),depth=176-top;
+  var cols=mode==='menses'?['#d63a5a','#7a0f2a']:mode==='fert'?['#e0a050','#8a1b3a']:['#b3294d','#6a0f27'];
+  var wv='M0 0 Q25 -9 50 0 T100 0 T150 0 T200 0 T250 0 T300 0 T350 0 T400 0 V230 H0 Z';
+  var b='';[[62,0],[92,1.3],[118,2.4],[142,0.7],[78,3.1]].forEach(function(p,i){b+='<circle class="bub" cx="'+p[0]+'" cy="'+(depth-8)+'" r="'+(2.2+i%3)+'" style="--rise:'+Math.max(depth-30,20)+'px;animation-delay:'+p[1]+'s"/>';});
+  return '<div class="heartbox"><svg viewBox="0 0 200 190" class="heart '+mode+'" role="img" aria-label="День цикла '+day+' из '+L+'">'+
+  '<defs><clipPath id="hc"><path d="'+HP+'"/></clipPath>'+
+  '<linearGradient id="lq" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="'+cols[0]+'"/><stop offset="1" stop-color="'+cols[1]+'"/></linearGradient>'+
+  '<linearGradient id="hs" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#fbe7b5"/><stop offset=".5" stop-color="#d9a64a"/><stop offset="1" stop-color="#a86f25"/></linearGradient></defs>'+
+  '<path class="hempty" d="'+HP+'"/>'+
+  '<g clip-path="url(#hc)"><g class="liq'+(anim?' go':'')+'" style="--to:'+top+'px">'+
+  '<g class="wave w2"><path d="'+wv+'" fill="url(#lq)" opacity=".5" transform="translate(-30 -3)"/></g>'+
+  '<g class="wave w1"><path d="'+wv+'" fill="url(#lq)"/></g>'+b+'</g>'+
+  '<ellipse cx="62" cy="52" rx="16" ry="8" fill="#fff" opacity=".28" transform="rotate(-35 62 52)"/></g>'+
+  '<path d="'+HP+'" fill="none" stroke="url(#hs)" stroke-width="4" stroke-linejoin="round"/>'+
+  '<text class="ht1" x="100" y="92">день</text><text class="ht2" id="hnum" x="100" y="136" data-n="'+day+'">'+(anim?'0':day)+'</text></svg></div>';
+}
 function render(){
   if(!starts.length){
     var T0=todayT();
@@ -167,8 +204,10 @@ function render(){
   else if(T<=cur.ov+DAY)phase=T===cur.ov?'Скорее всего день овуляции':'Фертильные дни';
   else phase='После овуляции';
 
+  var inFertNow=T>=cur.ov-5*DAY&&T<=cur.ov+DAY;
   var h='<header><h1>Дракончики моего котёнка <span class="beat">♥️</span></h1><div class="for">Специально для моей любимой жинки</div></header>';
-  h+='<div class="card now"><div class="k">Сегодня, день цикла '+day+'</div><div class="phase">'+phase+'</div></div>';
+  var mode=(phase==='Месячные')?'menses':(inFertNow?'fert':'normal');
+  h+='<div class="card now">'+heartSVG(day,c.L,mode,heartAnim)+'<div class="phase">'+phase+'</div>'+(sub?'<div class="sub">'+esc(sub)+'</div>':'')+(inFertNow?'<div><span class="pill">Фертильное окно, лучшие дни</span></div>':'')+'<div class="sub">день '+day+' из ~'+c.L+'</div></div>';
   h+='<button class="main" data-act="today">Месячные начались сегодня</button>';
   if(msg)h+='<div class="ok">'+msg+(justAdded?'<div class="row2"><button class="mini ghost" data-act="editLast">Изменить дату</button><button class="mini ghost" data-act="undo">Отменить запись</button></div>':'')+'</div>';
   h+='<div class="date-row"><input type="date" id="d" value="'+iso(T)+'" aria-label="Дата начала месячных"><button data-act="other">Записать эту дату</button></div>';
@@ -209,6 +248,14 @@ function render(){
     Array.prototype.forEach.call(root.children,function(el,i){el.style.animationDelay=(i*80)+'ms';});
     setTimeout(function(){root.classList.remove('enter');},1800);
   }
+  if(heartAnim){
+    heartAnim=false;
+    var nEl=document.getElementById('hnum');
+    if(nEl){var tgt=parseInt(nEl.getAttribute('data-n'),10),t0=null;
+      (function step(ts){if(t0===null)t0=ts;var p=Math.min((ts-t0)/1800,1);nEl.textContent=Math.round(tgt*(1-Math.pow(1-p,3)));if(p<1)requestAnimationFrame(step);else nEl.textContent=tgt;})(performance.now?performance.now():0);
+      requestAnimationFrame(function(ts){});
+    }
+  }
   if(calAnim){var cc=root.querySelector('.cells');if(cc){cc.parentNode.style.setProperty('--dx',calAnim==='next'?'24px':'-24px');cc.parentNode.classList.add('swap');}calAnim='';}
 }
 
@@ -216,7 +263,7 @@ function add(dateStr){
   if(!dateStr){msg='Выбери дату.';justAdded=null;render();return;}
   if(starts.indexOf(dateStr)>=0){msg='Эта дата уже записана.';justAdded=null;render();return;}
   starts.push(dateStr);starts.sort();save();
-  justAdded=dateStr;msg='Записано: '+fmt(D(dateStr))+'. Прогноз обновлён ♥️';
+  heartAnim=true;justAdded=dateStr;msg='Записано: '+fmt(D(dateStr))+'. Прогноз обновлён ♥️';
   var t=D(dateStr);calY=new Date(t).getUTCFullYear();calM=new Date(t).getUTCMonth();
   render();window.scrollTo(0,0);
   var okEl=document.querySelector('.ok');if(okEl){var r=okEl.getBoundingClientRect();burst(window.innerWidth/2,Math.max(r.top+20,80));}
