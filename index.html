@@ -154,7 +154,7 @@ button:focus-visible,input:focus-visible,summary:focus-visible{outline:3px solid
 input[type=date]{-webkit-appearance:none;appearance:none;display:block;width:100%;min-width:0;min-height:50px;height:50px;line-height:1.2;font:inherit;font-weight:600;color:var(--ink);background:var(--bg);border:1px solid var(--line);border-radius:14px;padding:0 14px;text-align:left}
 input[type=date]::-webkit-date-and-time-value{text-align:left;min-height:1.2em}
 input[type=date]::-webkit-calendar-picker-indicator{opacity:.8;filter:invert(.78) sepia(1) saturate(3) hue-rotate(2deg)}
-.bigdate{height:58px;text-align:center}
+.bigdate,input[type=date].bigdate{height:58px;text-align:center}
 .bigdate::-webkit-date-and-time-value{text-align:center}
 .date-row{align-items:stretch}
 .date-row input{flex:1 1 auto}
@@ -251,7 +251,7 @@ function render(){
     var fl='';for(var q=0;q<10;q++){fl+='<span class="hf" style="left:'+(4+q*10)+'%;font-size:'+(14+(q*7)%16)+'px;animation-duration:'+(11+(q*3)%7)+'s;animation-delay:'+(-(q*2.3))+'s;--sx:'+((q%2?1:-1)*(20+q*6))+'px;--rot:'+((q%2?1:-1)*25)+'deg;'+(q%3===1?'color:#ebc070':'')+'">♥️</span>';}
     var chips=[[0,'Сегодня'],[1,'Вчера'],[3,'3 дня назад'],[7,'Неделю назад']].map(function(x){return '<button class="chip" data-act="chip" data-off="'+x[0]+'">'+x[1]+'</button>';}).join('');
     document.getElementById('root').innerHTML='<div class="floaters" aria-hidden="true">'+fl+'</div>'+headerHTML()+
-      '<div class="now">'+heartSVG(1,28,'normal',true,'0.2s',{pct:0.42,t1:'',t2:'Ашкым'})+'</div>'+
+      '<div class="now">'+heartSVG(1,28,'normal',true,'0.2s',{pct:1.15,t1:'',t2:'Ашкым'})+'</div>'+
       '<div class="card welcome"><h3>Давай начнём</h3><div class="sub">Когда начались последние месячные?</div>'+
       '<div class="chips">'+chips+'</div>'+
       '<input type="date" class="bigdate" id="d" value="'+iso(T0)+'" aria-label="Дата начала месячных">'+
