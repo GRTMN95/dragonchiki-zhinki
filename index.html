@@ -149,6 +149,28 @@ button:focus-visible,input:focus-visible,summary:focus-visible{outline:3px solid
 @keyframes fillup{from{transform:translateY(205px)}to{transform:translateY(var(--to))}}
 .ht.go{opacity:0;animation:fadeIn .8s ease calc(var(--hd,0s) + .8s) forwards}
 @media (prefers-reduced-motion:reduce){*,*::before,*::after{animation:none!important;transition:none!important}#splash{display:none}}
+
+/* inputs and buttons alignment (iOS) */
+input[type=date]{-webkit-appearance:none;appearance:none;display:block;width:100%;min-width:0;min-height:50px;height:50px;line-height:1.2;font:inherit;font-weight:600;color:var(--ink);background:var(--bg);border:1px solid var(--line);border-radius:14px;padding:0 14px;text-align:left}
+input[type=date]::-webkit-date-and-time-value{text-align:left;min-height:1.2em}
+input[type=date]::-webkit-calendar-picker-indicator{opacity:.8;filter:invert(.78) sepia(1) saturate(3) hue-rotate(2deg)}
+.bigdate{height:58px;text-align:center}
+.bigdate::-webkit-date-and-time-value{text-align:center}
+.date-row{align-items:stretch}
+.date-row input{flex:1 1 auto}
+.date-row button{flex:0 0 auto;height:50px;min-width:104px}
+.hist .edit{display:flex;align-items:center;gap:8px}
+.hist .edit input{height:46px;min-height:46px;flex:1 1 150px}
+.acts .mini{min-width:88px;height:40px;display:inline-flex;align-items:center;justify-content:center}
+.chips .chip{height:42px;display:inline-flex;align-items:center;justify-content:center}
+.ok .row2 .mini{height:42px}
+.heartbox{cursor:pointer;-webkit-tap-highlight-color:transparent;user-select:none;-webkit-user-select:none}
+.heart.tap{animation:tapbounce .55s cubic-bezier(.3,1.6,.5,1)!important}
+@keyframes tapbounce{0%{transform:scale(1)}30%{transform:scale(.9)}65%{transform:scale(1.08)}100%{transform:scale(1)}}
+.fly svg{display:block;filter:drop-shadow(0 3px 6px rgba(60,0,20,.5))}
+@keyframes popout{0%{opacity:0;transform:translate(0,0) scale(.3) rotate(0)}12%{opacity:1}100%{opacity:0;transform:translate(var(--dx),var(--dy)) scale(1.1) rotate(var(--r))}}
+.fly2{position:fixed;z-index:50;pointer-events:none;animation:popout 1.3s cubic-bezier(.15,.7,.3,1) forwards}
+.fly2 svg{display:block;filter:drop-shadow(0 3px 6px rgba(60,0,20,.5))}
 </style>
 </head>
 <body>
@@ -198,10 +220,10 @@ function calc(){
 function heartSVG(day,L,mode,anim,hd,custom){
   var HP='M100 176 C16 114 4 50 50 26 C77 13 98 30 100 52 C102 30 123 13 150 26 C196 50 184 114 100 176 Z';
   var pct=custom?custom.pct:Math.max(0.07,Math.min(1,day/L)),top=Math.round(176-pct*150),depth=176-top;
-  var cols=mode==='menses'?['#f2688a','#8c1236']:mode==='fert'?['#f4cd80','#b82a55']:['#e0587a','#7a1233'];
+  var cols=mode==='menses'?['#c0305a','#5e0c25']:mode==='fert'?['#d9964f','#7a1233']:['#a82250','#4d0a20'];
   var wv='M0 0 Q25 -9 50 0 T100 0 T150 0 T200 0 T250 0 T300 0 T350 0 T400 0 V230 H0 Z';
   var b='';[[62,0],[92,1.3],[118,2.4],[142,0.7],[78,3.1]].forEach(function(p,i){b+='<circle class="bub" cx="'+p[0]+'" cy="'+(depth-8)+'" r="'+(2.2+i%3)+'" style="--rise:'+Math.max(depth-30,20)+'px;animation-delay:'+p[1]+'s"/>';});
-  return '<div class="heartbox'+(anim?' go':'')+'" style="--hd:'+hd+'"><svg viewBox="0 0 200 190" class="heart '+mode+'" role="img" aria-label="День цикла '+day+' из '+L+'">'+
+  return '<div class="heartbox'+(anim?' go':'')+'" data-act="heart" role="button" tabindex="0" aria-label="Сердечко, нажми" style="--hd:'+hd+'"><svg viewBox="0 0 200 190" class="heart '+mode+'" role="img" aria-label="День цикла '+day+' из '+L+'">'+
   '<defs><clipPath id="hc"><path d="'+HP+'"/></clipPath>'+
   '<linearGradient id="lq" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="'+cols[0]+'"/><stop offset="1" stop-color="'+cols[1]+'"/></linearGradient>'+
   '<linearGradient id="hs" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#fbe7b5"/><stop offset=".5" stop-color="#d9a64a"/><stop offset="1" stop-color="#a86f25"/></linearGradient></defs>'+
@@ -311,21 +333,39 @@ function add(dateStr){
   render();window.scrollTo(0,0);
   var okEl=document.querySelector('.ok');if(okEl){var r=okEl.getBoundingClientRect();burst(window.innerWidth/2,Math.max(r.top+20,80));}
 }
+var HPATH='M12 21C4 15 2 9.5 6 7c2.3-1.3 4.6 0 6 2 1.4-2 3.7-3.3 6-2 4 2.5 2 8-6 14z';
+var HCOLS=['#8a1b3a','#a82250','#6a0f27','#c2345e','#7a1233','#ebc070'];
+function heartEl(size,color){return '<svg viewBox="0 0 24 24" width="'+size+'" height="'+size+'"><path d="'+HPATH+'" fill="'+color+'"/></svg>';}
+function reduced(){return window.matchMedia&&window.matchMedia('(prefers-reduced-motion: reduce)').matches;}
 function burst(x,y){
   try{
-    if(window.matchMedia&&window.matchMedia('(prefers-reduced-motion: reduce)').matches)return;
-    var chars=['♥️','♥️','✦','♥️','✧'];
-    for(var i=0;i<14;i++){
+    if(reduced())return;
+    for(var i=0;i<16;i++){
       var e=document.createElement('span');e.className='fly';
-      e.textContent=chars[i%chars.length];
+      e.innerHTML=heartEl(Math.round(14+Math.random()*16),HCOLS[i%HCOLS.length]);
       e.style.left=(x-10)+'px';e.style.top=y+'px';
       e.style.setProperty('--x',(Math.random()*240-120)+'px');
       e.style.setProperty('--r',(Math.random()*60-30)+'deg');
       e.style.animationDelay=(Math.random()*0.25)+'s';
-      e.style.color=i%3===1?'#d9a64a':'#8a1b3a';
-      e.style.fontSize=(16+Math.random()*14)+'px';
       document.body.appendChild(e);
       (function(el){setTimeout(function(){if(el.parentNode)el.parentNode.removeChild(el);},2000);})(e);
+    }
+  }catch(err){}
+}
+function popHearts(x,y){
+  try{
+    if(reduced())return;
+    var n=14;
+    for(var i=0;i<n;i++){
+      var a=(Math.PI*2/n)*i+Math.random()*0.5,d=70+Math.random()*90;
+      var e=document.createElement('span');e.className='fly2';
+      e.innerHTML=heartEl(Math.round(14+Math.random()*18),HCOLS[i%HCOLS.length]);
+      e.style.left=(x-12)+'px';e.style.top=(y-12)+'px';
+      e.style.setProperty('--dx',(Math.cos(a)*d)+'px');
+      e.style.setProperty('--dy',(Math.sin(a)*d-40)+'px');
+      e.style.setProperty('--r',(Math.random()*80-40)+'deg');
+      document.body.appendChild(e);
+      (function(el){setTimeout(function(){if(el.parentNode)el.parentNode.removeChild(el);},1500);})(e);
     }
   }catch(err){}
 }
@@ -333,6 +373,12 @@ document.addEventListener('click',function(e){
   var el=e.target.closest('[data-act]');if(!el)return;
   var a=el.getAttribute('data-act');
   if(a==='today')add(iso(todayT()));
+  else if(a==='heart'){
+    var sv=el.querySelector('svg.heart');if(sv){sv.classList.remove('tap');void sv.getBoundingClientRect();sv.classList.add('tap');setTimeout(function(){sv.classList.remove('tap');},700);}
+    var px=(e.clientX||0),py=(e.clientY||0);
+    if(!px&&!py){var rc=el.getBoundingClientRect();px=rc.left+rc.width/2;py=rc.top+rc.height/2;}
+    popHearts(px,py);
+  }
   else if(a==='chip'){var off=parseInt(el.getAttribute('data-off'),10);var inp=document.getElementById('d');if(inp)inp.value=iso(todayT()-off*DAY);Array.prototype.forEach.call(document.querySelectorAll('.chip'),function(c2){c2.classList.toggle('on',c2===el);});}
   else if(a==='other')add(document.getElementById('d').value);
   else if(a==='undo'){var i=starts.indexOf(justAdded);if(i>=0)starts.splice(i,1);save();justAdded=null;msg='Запись отменена.';render();}
