@@ -84,7 +84,7 @@ button:focus-visible,input:focus-visible,summary:focus-visible{outline:3px solid
 .ht1{font-size:13px;font-weight:700;letter-spacing:.2em;text-transform:uppercase;fill:rgba(255,255,255,.92);text-anchor:middle}
 .ht2{font-family:var(--display);font-weight:800;font-size:54px;letter-spacing:-.03em;fill:#fff;text-anchor:middle}
 .ht1,.ht2{filter:drop-shadow(0 2px 6px rgba(40,0,15,.6))}
-.ht2.small{font-size:30px}
+.ht2.small{font-size:31px;letter-spacing:-.01em}
 .now .phase{font-family:var(--display);font-weight:800;font-size:25px;letter-spacing:-.02em;margin-top:6px}
 /* calendar */
 .cal-head{display:flex;align-items:center;justify-content:space-between;gap:8px}
@@ -211,7 +211,7 @@ function heartSVG(day,L,mode,anim,hd,custom){
   '<g class="wave w1"><path d="'+wv+'" fill="url(#lq)"/></g>'+b+'</g>'+
   '<ellipse cx="62" cy="52" rx="16" ry="8" fill="#fff" opacity=".28" transform="rotate(-35 62 52)"/></g>'+
   '<path class="hout'+(anim?' go':'')+'" pathLength="1" d="'+HP+'" fill="none" stroke="url(#hs)" stroke-width="4.5" stroke-linejoin="round"/>'+
-  (custom?'<text class="ht1 ht'+(anim?' go':'')+'" x="100" y="96">'+custom.t1+'</text><text class="ht2 small ht'+(anim?' go':'')+'" x="100" y="136">'+custom.t2+'</text>':'<text class="ht1 ht'+(anim?' go':'')+'" x="100" y="92">день</text><text class="ht2 ht'+(anim?' go':'')+'" id="hnum" x="100" y="136" data-n="'+day+'" data-d="'+(parseFloat(hd)*1000+900)+'">'+(anim?'0':day)+'</text>')+'</svg></div>';
+  (custom?'<text class="ht1 ht'+(anim?' go':'')+'" x="100" y="96">'+custom.t1+'</text><text class="ht2 small ht'+(anim?' go':'')+'" x="100" y="'+(custom.t1?136:108)+'">'+custom.t2+'</text>':'<text class="ht1 ht'+(anim?' go':'')+'" x="100" y="92">день</text><text class="ht2 ht'+(anim?' go':'')+'" id="hnum" x="100" y="136" data-n="'+day+'" data-d="'+(parseFloat(hd)*1000+900)+'">'+(anim?'0':day)+'</text>')+'</svg></div>';
 }
 function headerHTML(){
   return '<header class="top"><h1><span class="gt">Дракончики</span></h1><div class="sub2">моего котёнка <span class="beat">♥️</span></div><div class="for">Специально для моей любимой жинки</div></header>';
@@ -229,7 +229,7 @@ function render(){
     var fl='';for(var q=0;q<10;q++){fl+='<span class="hf" style="left:'+(4+q*10)+'%;font-size:'+(14+(q*7)%16)+'px;animation-duration:'+(11+(q*3)%7)+'s;animation-delay:'+(-(q*2.3))+'s;--sx:'+((q%2?1:-1)*(20+q*6))+'px;--rot:'+((q%2?1:-1)*25)+'deg;'+(q%3===1?'color:#ebc070':'')+'">♥️</span>';}
     var chips=[[0,'Сегодня'],[1,'Вчера'],[3,'3 дня назад'],[7,'Неделю назад']].map(function(x){return '<button class="chip" data-act="chip" data-off="'+x[0]+'">'+x[1]+'</button>';}).join('');
     document.getElementById('root').innerHTML='<div class="floaters" aria-hidden="true">'+fl+'</div>'+headerHTML()+
-      '<div class="now">'+heartSVG(1,28,'normal',true,'0.2s',{pct:0.42,t1:'привет',t2:'любимая'})+'</div>'+
+      '<div class="now">'+heartSVG(1,28,'normal',true,'0.2s',{pct:0.42,t1:'',t2:'Ашкым'})+'</div>'+
       '<div class="card welcome"><h3>Давай начнём</h3><div class="sub">Когда начались последние месячные?</div>'+
       '<div class="chips">'+chips+'</div>'+
       '<input type="date" class="bigdate" id="d" value="'+iso(T0)+'" aria-label="Дата начала месячных">'+
