@@ -197,8 +197,8 @@ function render(){
       '<button class="main" data-act="other">Записать</button><div class="sub">Дальше достаточно нажимать одну кнопку, когда начинаются новые месячные.</div>';
     return;
   }
-  var c=calc(),T=c.T,cur=c.cur,day=Math.round((T-c.last)/DAY)+1,phase;
-  if(T>=cur.next)phase=T===cur.next?'Сегодня ждём месячные':'Месячные задерживаются на '+days(Math.round((T-cur.next)/DAY));
+  var c=calc(),T=c.T,cur=c.cur,day=Math.round((T-c.last)/DAY)+1,phase,sub='';
+  if(T>=cur.next){phase=T===cur.next?'Сегодня ждём месячные':'Месячные задерживаются на '+days(Math.round((T-cur.next)/DAY));if(T>cur.next)sub='Если уже началось, нажми большую кнопку ниже.';}
   else if(day<=PL)phase='Месячные';
   else if(T<cur.ov-5*DAY)phase='До фертильных дней';
   else if(T<=cur.ov+DAY)phase=T===cur.ov?'Скорее всего день овуляции':'Фертильные дни';
