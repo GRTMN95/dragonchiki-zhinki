@@ -10,157 +10,145 @@
 <meta name="apple-mobile-web-app-title" content="Дракончики">
 <meta name="theme-color" content="#5e1228">
 <style>
-/* Layout idea: one simple column. Big button on top, forecast cards, small calendar, history. */
 :root{
-  --bg:#f6eef0; --surface:#fffafb; --ink:#2a1218; --muted:#70505a; --line:#e8d4d9;
-  --period:#8a1b3a; --period-ink:#ffffff; --fert:#f1d5dc; --fert-ink:#5e1226;
-  --ov:#d4a24c; --ov-ink:#2b1a00; --accent:#6d1129; --accent-ink:#ffffff;
-  --display:-apple-system,BlinkMacSystemFont,'SF Pro Display','SF Pro Text','Helvetica Neue',system-ui,sans-serif; --body:-apple-system,BlinkMacSystemFont,'SF Pro Text','SF Pro Display','Helvetica Neue',system-ui,sans-serif;
-  color-scheme:light;
-}
-@media (prefers-color-scheme: dark){
-  :root:not([data-theme="light"]){
-    --bg:#1a0a0f; --surface:#271218; --ink:#f4e6e9; --muted:#c7a4ad; --line:#40242c;
-    --period:#d6516f; --period-ink:#2a0710; --fert:#4a1f2c; --fert-ink:#f3b9c8;
-    --ov:#e8b85a; --ov-ink:#2b1d00; --accent:#e07a93; --accent-ink:#2a0710; color-scheme:dark;
-  }
-}
-:root[data-theme="dark"]{
-  --bg:#1a0a0f; --surface:#271218; --ink:#f4e6e9; --muted:#c7a4ad; --line:#40242c;
-  --period:#d6516f; --period-ink:#2a0710; --fert:#4a1f2c; --fert-ink:#f3b9c8;
-  --ov:#e8b85a; --ov-ink:#2b1d00; --accent:#e07a93; --accent-ink:#2a0710; color-scheme:dark;
+  --ink:#f8ede7; --muted:#d1abb5; --gold:#ebc070; --gold-d:#b98337; --rose:#e0587a;
+  --bg:rgba(0,0,0,.28); --surface:rgba(255,236,226,.07); --line:rgba(244,205,150,.2);
+  --period:#d83f6b; --period-ink:#ffffff; --fert:rgba(235,192,112,.22); --fert-ink:#f7dca0;
+  --ov:#ebc070; --ov-ink:#2a0710; --accent:#ebc070; --accent-ink:#2a0710;
+  --display:-apple-system,BlinkMacSystemFont,'SF Pro Display','SF Pro Text','Helvetica Neue',system-ui,sans-serif;
+  --body:-apple-system,BlinkMacSystemFont,'SF Pro Text','SF Pro Display','Helvetica Neue',system-ui,sans-serif;
+  color-scheme:dark;
 }
 *{box-sizing:border-box}
+html{background:#1d060d}
 html,body{margin:0;padding:0}
-body{background:var(--bg);color:var(--ink);font-family:var(--body);font-size:16px;line-height:1.45;-webkit-text-size-adjust:100%}
-#root{max-width:520px;margin:0 auto;padding:20px 16px 48px;display:flex;flex-direction:column;gap:14px}
-h1,h2{margin:0;text-wrap:balance}
-h1{font-family:var(--display);font-weight:700;font-size:24px;line-height:1.15;letter-spacing:-.02em}
-.for{color:var(--accent);font-weight:700;margin-top:6px}
-h2{font-family:var(--display);font-weight:700;font-size:20px;letter-spacing:-.01em;margin-top:8px}
-.card{background:var(--surface);border:1px solid var(--line);border-radius:16px;padding:16px}
-.k{font-size:13px;color:var(--muted)}
-.big{font-size:22px;font-weight:700;font-variant-numeric:tabular-nums;margin-top:2px}
+body{background:#1d060d;color:var(--ink);font-family:var(--body);font-size:16px;line-height:1.45;-webkit-text-size-adjust:100%;min-height:100vh}
+body::before{content:"";position:fixed;inset:-20%;z-index:-2;pointer-events:none;background:radial-gradient(circle at 20% 8%,rgba(235,192,112,.22),transparent 42%),radial-gradient(circle at 85% 82%,rgba(216,63,107,.26),transparent 48%),linear-gradient(180deg,#2e0a18,#400e25 50%,#1d060d);animation:drift 22s ease-in-out infinite alternate}
+body::after{content:"";position:fixed;inset:0;z-index:-1;pointer-events:none;background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='56' height='56'%3E%3Cpath d='M28 5L51 28 28 51 5 28Z' fill='none' stroke='%23ebc070' stroke-opacity='.10'/%3E%3Ccircle cx='28' cy='28' r='1.6' fill='%23ebc070' fill-opacity='.14'/%3E%3C/svg%3E")}
+#root{max-width:520px;margin:0 auto;padding:22px 18px 56px;display:flex;flex-direction:column;gap:16px}
+h1,h2,h3{margin:0;text-wrap:balance}
+header.top{text-align:center;padding:6px 0 0;display:flex;flex-direction:column;align-items:center;gap:2px}
+header.top h1{font-family:var(--display);font-weight:800;font-size:36px;line-height:1.05;letter-spacing:-.03em}
+.gt{background:linear-gradient(180deg,#fff2d4 0%,#ebc070 55%,#c48a3a 100%);-webkit-background-clip:text;background-clip:text;color:transparent;-webkit-text-fill-color:transparent}
+header.top .sub2{font-size:17px;font-weight:600;color:var(--ink);letter-spacing:-.01em}
+.for{margin-top:6px;font-size:13px;font-weight:600;letter-spacing:.04em;background:linear-gradient(100deg,var(--muted) 35%,#fff0cf 50%,var(--muted) 65%);background-size:250% 100%;-webkit-background-clip:text;background-clip:text;color:transparent;-webkit-text-fill-color:transparent;animation:sheen 6s ease-in-out infinite}
+h2{font-size:12px;font-weight:700;letter-spacing:.16em;text-transform:uppercase;color:var(--gold);margin:8px 2px -4px}
+.card{background:var(--surface);border:1px solid var(--line);border-radius:24px;padding:18px;backdrop-filter:blur(16px);-webkit-backdrop-filter:blur(16px);box-shadow:0 12px 34px rgba(0,0,0,.28),inset 0 1px 0 rgba(255,255,255,.08)}
+.k{font-size:12px;font-weight:600;letter-spacing:.04em;color:var(--muted)}
+.big{font-size:23px;font-weight:800;font-variant-numeric:tabular-nums;letter-spacing:-.02em;margin-top:4px}
 .sub{font-size:13px;color:var(--muted)}
 .grid2{display:grid;grid-template-columns:1fr 1fr;gap:12px}
-.now .phase{font-family:var(--display);font-weight:500;font-size:17px;margin-top:2px}
-button,input{font:inherit;color:inherit}
-.main{width:100%;background:var(--accent);color:var(--accent-ink);border:0;border-radius:16px;padding:18px 16px;font-weight:700;font-size:18px;min-height:60px;cursor:pointer}
-.link{background:none;border:0;color:var(--accent);font-weight:700;text-decoration:underline;padding:8px 0;cursor:pointer;min-height:40px}
+.icard{display:flex;flex-direction:column;gap:2px}
+.icard svg{width:26px;height:26px;margin-bottom:6px;fill:none;stroke:var(--gold);stroke-width:1.7;stroke-linecap:round;stroke-linejoin:round}
+button,input,select,textarea{font:inherit;color:inherit}
+button{cursor:pointer;-webkit-tap-highlight-color:transparent}
+.main{width:100%;border:0;border-radius:999px;padding:19px 18px;font-weight:800;font-size:18px;letter-spacing:-.01em;min-height:62px;color:#2a0710;background:linear-gradient(135deg,#fbe3a6 0%,#ebc070 45%,#b98337 100%);position:relative;overflow:hidden;transition:transform .15s ease;animation:glow 3.2s ease-in-out infinite}
+.main:active{transform:scale(.975)}
+.main::after{content:"";position:absolute;top:0;bottom:0;left:-40%;width:30%;background:linear-gradient(100deg,transparent,rgba(255,255,255,.55),transparent);transform:skewX(-20deg);animation:shine 5s ease-in-out infinite}
+@keyframes shine{0%,55%{left:-40%}100%{left:130%}}
+@keyframes glow{0%,100%{box-shadow:0 8px 22px rgba(235,192,112,.22)}50%{box-shadow:0 10px 36px rgba(235,192,112,.5)}}
+.link{background:none;border:0;color:var(--gold);font-weight:700;text-decoration:underline;padding:8px 0;min-height:40px}
+details.more{border:1px solid var(--line);border-radius:18px;background:var(--surface);padding:0 16px}
+details.more summary{list-style:none;cursor:pointer;padding:15px 0;font-weight:700;color:var(--gold);display:flex;justify-content:space-between;align-items:center}
+details.more summary::-webkit-details-marker{display:none}
+details.more summary::after{content:"+";font-size:22px;font-weight:400;transition:transform .25s}
+details.more[open] summary::after{transform:rotate(45deg)}
+details.more .date-row{padding-bottom:16px}
 .date-row{display:flex;gap:10px}
-.date-row input{flex:1;min-width:0;background:var(--surface);border:1px solid var(--line);border-radius:12px;padding:10px;min-height:46px}
-.date-row button{background:transparent;color:var(--accent);border:2px solid var(--accent);border-radius:12px;padding:0 16px;font-weight:700;min-height:46px;cursor:pointer}
-button:focus-visible,input:focus-visible{outline:3px solid var(--accent);outline-offset:2px}
-.ok{background:var(--fert);color:var(--fert-ink);border-radius:12px;padding:10px 12px;font-size:14px}
-.cal-head{display:flex;align-items:center;justify-content:space-between;gap:8px}
-.cal-head h2{margin:0;text-transform:capitalize}
-.arrow{background:transparent;border:2px solid var(--accent);color:var(--accent);border-radius:12px;width:46px;height:46px;font-size:20px;font-weight:700;cursor:pointer}
-.dow,.cells{display:grid;grid-template-columns:repeat(7,1fr);gap:4px}
-.dow span{text-align:center;font-size:11px;color:var(--muted)}
-.cell{aspect-ratio:1/1;border-radius:10px;background:var(--surface);display:flex;align-items:center;justify-content:center;font-size:14px;font-variant-numeric:tabular-nums;border:1.5px solid transparent;min-height:38px}
-.cell.out{visibility:hidden}
-.cell.p{background:var(--period);color:var(--period-ink);font-weight:700}
-.cell.pp{border:1.5px dashed var(--period);color:var(--period)}
-.cell.fe{background:var(--fert);color:var(--fert-ink)}
-.cell.ov{background:var(--ov);color:var(--ov-ink);font-weight:800}
-.cell.today{box-shadow:0 0 0 2px var(--ink)}
-.legend{display:flex;flex-wrap:wrap;gap:6px 14px;font-size:12.5px;color:var(--muted);margin-top:10px}
-.legend span::before{content:"";display:inline-block;width:11px;height:11px;border-radius:3px;margin-right:6px;vertical-align:-1px;background:var(--c)}
-.hist{display:flex;flex-direction:column}
-.hist div{display:flex;justify-content:space-between;gap:10px;padding:9px 0;border-bottom:1px solid var(--line);font-variant-numeric:tabular-nums}
-.hist div:last-child{border-bottom:0}
-.mini{background:var(--accent);color:var(--accent-ink);border:0;border-radius:10px;padding:0 12px;font-weight:700;font-size:14px;min-height:40px;cursor:pointer}
-.mini.ghost{background:transparent;color:var(--accent);border:1.5px solid var(--accent)}
-.mini.danger{background:var(--period);color:var(--period-ink)}
+.date-row input{flex:1;min-width:0;background:var(--bg);border:1px solid var(--line);border-radius:14px;padding:10px 12px;min-height:48px}
+.date-row button{background:transparent;color:var(--gold);border:1.5px solid var(--gold);border-radius:14px;padding:0 16px;font-weight:700;min-height:48px}
+button:focus-visible,input:focus-visible,summary:focus-visible{outline:3px solid var(--gold);outline-offset:2px}
+.ok{background:rgba(235,192,112,.14);color:#f8dfa6;border:1px solid rgba(235,192,112,.4);border-radius:16px;padding:12px 14px;font-size:14.5px}
+.ok .row2{display:flex;flex-wrap:wrap;gap:8px;margin-top:10px}
+.pill{display:inline-block;font-size:13px;font-weight:700;padding:5px 14px;border-radius:99px;background:rgba(235,192,112,.18);color:#f8dfa6;border:1px solid rgba(235,192,112,.4)}
+.pill.rose{background:rgba(216,63,107,.2);color:#ffc2d1;border-color:rgba(216,63,107,.5)}
+.mini{background:linear-gradient(135deg,#fbe3a6,#ebc070 50%,#b98337);color:#2a0710;border:0;border-radius:12px;padding:0 14px;font-weight:700;font-size:14px;min-height:40px}
+.mini.ghost{background:transparent;color:var(--gold);border:1.5px solid rgba(235,192,112,.6)}
+.mini.danger{background:var(--period);color:#fff}
+.mini:active,.arrow:active,.date-row button:active,.chip:active{transform:scale(.95)}
 .acts{display:flex;gap:8px;flex-shrink:0}
-.hist .edit{flex-wrap:wrap;align-items:center}
-.hist .edit input{flex:1;min-width:140px;background:var(--bg);border:1px solid var(--line);border-radius:10px;padding:8px;min-height:42px}
-.ok .row2{display:flex;flex-wrap:wrap;gap:8px;margin-top:8px}
-.foot{text-align:center;color:var(--accent);font-weight:700;margin-top:6px}
-
-
-/* living heart */
-.now{text-align:center;display:flex;flex-direction:column;align-items:center;gap:4px;padding-top:10px}
-.heartbox{width:min(250px,70vw);margin:0 auto}
+/* hero heart */
+.now{text-align:center;display:flex;flex-direction:column;align-items:center;gap:8px;padding:0;background:none;border:0;box-shadow:none;backdrop-filter:none;-webkit-backdrop-filter:none}
+.heartbox{width:min(300px,82vw);margin:0 auto;filter:drop-shadow(0 16px 44px rgba(216,63,107,.38))}
 .heart{display:block;width:100%;height:auto;overflow:visible;animation:hbeat 3.2s ease-in-out infinite;transform-origin:50% 60%}
 @keyframes hbeat{0%,100%{transform:scale(1)}10%{transform:scale(1.035)}20%{transform:scale(1)}30%{transform:scale(1.025)}40%{transform:scale(1)}}
-.heart.fert{filter:drop-shadow(0 0 12px rgba(224,171,82,.65));animation:hbeat 3.2s ease-in-out infinite,hglow 2.4s ease-in-out infinite}
-@keyframes hglow{0%,100%{filter:drop-shadow(0 0 6px rgba(224,171,82,.35))}50%{filter:drop-shadow(0 0 18px rgba(224,171,82,.9))}}
-.hempty{fill:var(--fert);opacity:.6}
+.heart.fert{animation:hbeat 3.2s ease-in-out infinite,hglow 2.4s ease-in-out infinite}
+@keyframes hglow{0%,100%{filter:drop-shadow(0 0 6px rgba(235,192,112,.35))}50%{filter:drop-shadow(0 0 20px rgba(235,192,112,.95))}}
+.hempty{fill:rgba(255,236,226,.08)}
 .liq{transform:translateY(var(--to))}
-.liq.go{animation:fillup 2.6s cubic-bezier(.25,.8,.25,1) both}
-@keyframes fillup{from{transform:translateY(205px)}to{transform:translateY(var(--to))}}
 .wave{animation:wave 4.5s linear infinite}
 .wave.w2{animation-duration:7s;animation-direction:reverse}
 @keyframes wave{from{transform:translateX(0)}to{transform:translateX(-100px)}}
 .bub{fill:#fff;opacity:0;animation:bub 4.2s ease-in infinite}
 @keyframes bub{0%{transform:translateY(0);opacity:0}20%{opacity:.55}100%{transform:translateY(calc(var(--rise) * -1));opacity:0}}
-.ht1{font-size:14px;font-weight:700;letter-spacing:.14em;text-transform:uppercase}
-.ht2{font-family:var(--display);font-weight:700;font-size:50px;letter-spacing:-.02em}
-.ht1,.ht2{fill:var(--ink);stroke:var(--surface);stroke-width:5px;paint-order:stroke;stroke-linejoin:round;text-anchor:middle}
-.now .phase{font-family:var(--display);font-weight:700;font-size:20px;letter-spacing:-.01em}
-
-/* animation */
-body::before{content:"";position:fixed;inset:-20%;z-index:-1;pointer-events:none;background:radial-gradient(circle at 25% 15%,rgba(214,162,76,.16),transparent 45%),radial-gradient(circle at 80% 75%,rgba(138,27,58,.16),transparent 50%);animation:drift 18s ease-in-out infinite alternate}
+.ht1{font-size:13px;font-weight:700;letter-spacing:.2em;text-transform:uppercase;fill:rgba(255,255,255,.92);text-anchor:middle}
+.ht2{font-family:var(--display);font-weight:800;font-size:54px;letter-spacing:-.03em;fill:#fff;text-anchor:middle}
+.ht1,.ht2{filter:drop-shadow(0 2px 6px rgba(40,0,15,.6))}
+.ht2.small{font-size:30px}
+.now .phase{font-family:var(--display);font-weight:800;font-size:25px;letter-spacing:-.02em;margin-top:6px}
+/* calendar */
+.cal-head{display:flex;align-items:center;justify-content:space-between;gap:8px}
+.cal-head h2{margin:0;font-size:18px;letter-spacing:-.01em;text-transform:capitalize;color:var(--ink)}
+.arrow{background:transparent;border:1.5px solid rgba(235,192,112,.6);color:var(--gold);border-radius:14px;width:46px;height:46px;font-size:22px;font-weight:700}
+.dow,.cells{display:grid;grid-template-columns:repeat(7,1fr);gap:5px}
+.dow span{text-align:center;font-size:11px;font-weight:700;color:var(--muted);padding-bottom:4px}
+.cell{aspect-ratio:1/1;border-radius:13px;background:rgba(255,255,255,.04);display:flex;align-items:center;justify-content:center;font-size:15px;font-weight:600;font-variant-numeric:tabular-nums;border:1.5px solid transparent;min-height:38px}
+.cell.out{visibility:hidden}
+.cell.p{background:linear-gradient(145deg,#ec5d86,#a82250);color:#fff;font-weight:800;box-shadow:0 4px 12px rgba(216,63,107,.35)}
+.cell.pp{border:1.5px dashed rgba(216,63,107,.8);color:#ffb3c6}
+.cell.fe{background:rgba(235,192,112,.2);color:#f7dca0;border-color:rgba(235,192,112,.35)}
+.cell.ov{background:linear-gradient(145deg,#fbe3a6,#e0a948);color:#2a0710;font-weight:800;box-shadow:0 4px 14px rgba(235,192,112,.45)}
+.cell.today{animation:ring 2.8s ease-in-out infinite}
+@keyframes ring{0%,100%{box-shadow:0 0 0 2px #fff}50%{box-shadow:0 0 0 2px #fff,0 0 0 8px rgba(255,255,255,.14)}}
+.legend{display:flex;flex-wrap:wrap;gap:6px 16px;font-size:12.5px;color:var(--muted);margin-top:14px}
+.legend span::before{content:"";display:inline-block;width:11px;height:11px;border-radius:4px;margin-right:6px;vertical-align:-1px;background:var(--c)}
+/* history */
+.hist{display:flex;flex-direction:column;padding:6px 18px}
+.hist>div{display:flex;justify-content:space-between;align-items:center;gap:10px;padding:13px 0;border-bottom:1px solid var(--line);font-variant-numeric:tabular-nums;font-weight:600}
+.hist>div:last-child{border-bottom:0}
+.hist .edit{flex-wrap:wrap}
+.hist .edit input{flex:1;min-width:140px;background:var(--bg);border:1px solid var(--line);border-radius:12px;padding:8px 10px;min-height:44px}
+.foot{text-align:center;color:var(--gold);font-weight:700;margin-top:4px}
+/* welcome */
+.floaters{position:fixed;inset:0;pointer-events:none;overflow:hidden;z-index:-1}
+.hf{position:absolute;bottom:-50px;opacity:0;animation:hfloat linear infinite;color:var(--period)}
+@keyframes hfloat{0%{transform:translate(0,0) rotate(0deg);opacity:0}12%{opacity:.4}88%{opacity:.25}100%{transform:translate(var(--sx),-112vh) rotate(var(--rot));opacity:0}}
+.welcome{display:flex;flex-direction:column;gap:6px}
+.welcome h3{font-family:var(--display);font-weight:800;font-size:21px;letter-spacing:-.02em}
+.chips{display:flex;flex-wrap:wrap;gap:8px;margin:12px 0 8px}
+.chip{background:transparent;border:1.5px solid rgba(235,192,112,.55);color:var(--gold);border-radius:99px;padding:8px 14px;font-weight:700;font-size:14px;min-height:40px;transition:background .2s,color .2s,transform .15s}
+.chip.on{background:var(--gold);color:#2a0710;border-color:var(--gold)}
+.bigdate{width:100%;font-size:20px;font-weight:700;text-align:center;background:var(--bg);border:1.5px solid var(--line);border-radius:16px;padding:12px;min-height:56px;margin-bottom:14px}
+/* motion */
 @keyframes drift{to{transform:translate3d(4%,3%,0) scale(1.08)}}
 @keyframes rise{from{opacity:0;transform:translateY(16px) scale(.985)}to{opacity:1;transform:none}}
 .enter>*{animation:rise .8s cubic-bezier(.2,.7,.2,1) both}
 @keyframes beat{0%,60%,100%{transform:scale(1)}15%{transform:scale(1.22)}30%{transform:scale(1)}45%{transform:scale(1.14)}}
 .beat{display:inline-block;animation:beat 2.6s ease-in-out infinite;transform-origin:50% 60%}
-.for{background:linear-gradient(100deg,var(--accent) 35%,#d9a64a 50%,var(--accent) 65%);background-size:250% 100%;-webkit-background-clip:text;background-clip:text;color:transparent;-webkit-text-fill-color:transparent;animation:sheen 6s ease-in-out infinite}
 @keyframes sheen{0%{background-position:120% 0}60%,100%{background-position:-120% 0}}
-.main{position:relative;overflow:hidden;transition:transform .15s ease;animation:glow 3.2s ease-in-out infinite}
-.main:active{transform:scale(.975)}
-.main::after{content:"";position:absolute;top:0;bottom:0;left:-40%;width:30%;background:linear-gradient(100deg,transparent,rgba(255,255,255,.28),transparent);transform:skewX(-20deg);animation:shine 5s ease-in-out infinite}
-@keyframes shine{0%,55%{left:-40%}100%{left:130%}}
-@keyframes glow{0%,100%{box-shadow:0 6px 16px rgba(109,17,41,.25)}50%{box-shadow:0 8px 28px rgba(109,17,41,.5)}}
-.card,.fc,.cell,.mini,.arrow,.date-row button{transition:transform .2s ease,box-shadow .2s ease,background .2s ease}
-.card:hover{box-shadow:0 8px 22px rgba(109,17,41,.14)}
-.mini:active,.arrow:active,.date-row button:active{transform:scale(.95)}
-@keyframes ring{0%,100%{box-shadow:0 0 0 2px var(--ink),0 0 0 2px rgba(0,0,0,0)}50%{box-shadow:0 0 0 2px var(--ink),0 0 0 7px rgba(214,162,76,.35)}}
-.cell.today{animation:ring 2.8s ease-in-out infinite}
 @keyframes fade{from{opacity:0;transform:translateX(var(--dx,0))}to{opacity:1;transform:none}}
 .swap{animation:fade .35s ease both}
 @keyframes floatup{0%{opacity:0;transform:translate(0,0) scale(.4)}15%{opacity:1}100%{opacity:0;transform:translate(var(--x),-190px) scale(1.2) rotate(var(--r))}}
 .fly{position:fixed;z-index:50;pointer-events:none;font-size:22px;animation:floatup 1.5s cubic-bezier(.2,.7,.3,1) forwards}
 .ok{animation:rise .5s cubic-bezier(.2,.7,.2,1) both}
-@media (prefers-reduced-motion:reduce){*,*::before,*::after{animation:none!important;transition:none!important}}
-
-/* splash + smoother heart */
 #splash{position:fixed;inset:0;z-index:100;background:radial-gradient(circle at 50% 40%,#8a1c3d,#4a0f22 60%,#240710);display:flex;flex-direction:column;align-items:center;justify-content:center;gap:18px;animation:splashout .8s ease 1.5s forwards}
 @keyframes splashout{to{opacity:0;visibility:hidden}}
 #splash svg{width:130px;height:auto;overflow:visible;animation:splashpulse 1.4s ease-in-out .9s both}
 @keyframes splashpulse{0%{transform:scale(1)}50%{transform:scale(1.09)}100%{transform:scale(1)}}
-#splash .o{fill:none;stroke:#e0ab52;stroke-width:4;stroke-linejoin:round;stroke-dasharray:1;stroke-dashoffset:1;animation:draw 1.1s cubic-bezier(.5,0,.2,1) .15s forwards}
-#splash .f{fill:#8a1b3a;opacity:0;animation:fadeIn .6s ease .9s forwards}
-#splash .t{color:#f7dca0;font-family:var(--display);font-weight:700;font-size:22px;letter-spacing:.02em;opacity:0;animation:fadeIn .7s ease .8s forwards}
+#splash .o{fill:none;stroke:#ebc070;stroke-width:4;stroke-linejoin:round;stroke-dasharray:1;stroke-dashoffset:1;animation:draw 1.1s cubic-bezier(.5,0,.2,1) .15s forwards}
+#splash .f{fill:#a82250;opacity:0;animation:fadeIn .6s ease .9s forwards}
+#splash .t{color:#f7dca0;font-family:var(--display);font-weight:800;font-size:24px;letter-spacing:-.01em;opacity:0;animation:fadeIn .7s ease .8s forwards}
 @keyframes draw{to{stroke-dashoffset:0}}
 @keyframes fadeIn{to{opacity:1}}
-@keyframes fadeEmpty{from{opacity:0}to{opacity:.6}}
+@keyframes fadeEmpty{from{opacity:0}to{opacity:1}}
 @keyframes pop{from{opacity:0;transform:scale(.78)}to{opacity:1;transform:none}}
 .heartbox.go{animation:pop 1s cubic-bezier(.34,1.4,.64,1) var(--hd,0s) both}
 .hempty.go{animation:fadeEmpty .9s ease var(--hd,0s) both}
 .hout.go{stroke-dasharray:1;animation:draw 1.2s cubic-bezier(.5,0,.2,1) var(--hd,0s) both}
 .liq.go{animation:fillup 2.3s cubic-bezier(.33,1,.68,1) calc(var(--hd,0s) + .9s) both}
-.ht1,.ht2{transition:opacity .4s}
+@keyframes fillup{from{transform:translateY(205px)}to{transform:translateY(var(--to))}}
 .ht.go{opacity:0;animation:fadeIn .8s ease calc(var(--hd,0s) + .8s) forwards}
-@media (prefers-reduced-motion:reduce){#splash{display:none}}
-
-/* welcome screen */
-.floaters{position:fixed;inset:0;pointer-events:none;overflow:hidden;z-index:-1}
-.hf{position:absolute;bottom:-50px;opacity:0;animation:hfloat linear infinite;color:var(--period)}
-@keyframes hfloat{0%{transform:translate(0,0) rotate(0deg);opacity:0}12%{opacity:.34}88%{opacity:.22}100%{transform:translate(var(--sx),-112vh) rotate(var(--rot));opacity:0}}
-.welcome h2{font-size:22px;margin:0 0 4px}
-.chips{display:flex;flex-wrap:wrap;gap:8px;margin:12px 0}
-.chip{background:transparent;border:1.5px solid var(--accent);color:var(--accent);border-radius:99px;padding:8px 14px;font-weight:700;font-size:14px;min-height:40px;cursor:pointer;transition:background .2s,color .2s,transform .15s}
-.chip:active{transform:scale(.95)}
-.chip.on{background:var(--accent);color:var(--accent-ink)}
-.bigdate{width:100%;font-size:20px;font-weight:700;text-align:center;background:var(--bg);border:1.5px solid var(--line);border-radius:14px;padding:12px;min-height:54px;color:var(--ink)}
-.feats{display:grid;grid-template-columns:repeat(3,1fr);gap:10px}
-.feat{background:var(--surface);border:1px solid var(--line);border-radius:14px;padding:12px 8px;text-align:center;font-size:12.5px;color:var(--muted)}
-.feat b{display:block;color:var(--ink);font-size:13.5px;margin:6px 0 2px}
-.feat svg{width:26px;height:26px}
-.ht2.small{font-size:30px}
+@media (prefers-reduced-motion:reduce){*,*::before,*::after{animation:none!important;transition:none!important}#splash{display:none}}
 </style>
 </head>
 <body>
@@ -210,7 +198,7 @@ function calc(){
 function heartSVG(day,L,mode,anim,hd,custom){
   var HP='M100 176 C16 114 4 50 50 26 C77 13 98 30 100 52 C102 30 123 13 150 26 C196 50 184 114 100 176 Z';
   var pct=custom?custom.pct:Math.max(0.07,Math.min(1,day/L)),top=Math.round(176-pct*150),depth=176-top;
-  var cols=mode==='menses'?['#d63a5a','#7a0f2a']:mode==='fert'?['#e0a050','#8a1b3a']:['#b3294d','#6a0f27'];
+  var cols=mode==='menses'?['#f2688a','#8c1236']:mode==='fert'?['#f4cd80','#b82a55']:['#e0587a','#7a1233'];
   var wv='M0 0 Q25 -9 50 0 T100 0 T150 0 T200 0 T250 0 T300 0 T350 0 T400 0 V230 H0 Z';
   var b='';[[62,0],[92,1.3],[118,2.4],[142,0.7],[78,3.1]].forEach(function(p,i){b+='<circle class="bub" cx="'+p[0]+'" cy="'+(depth-8)+'" r="'+(2.2+i%3)+'" style="--rise:'+Math.max(depth-30,20)+'px;animation-delay:'+p[1]+'s"/>';});
   return '<div class="heartbox'+(anim?' go':'')+'" style="--hd:'+hd+'"><svg viewBox="0 0 200 190" class="heart '+mode+'" role="img" aria-label="День цикла '+day+' из '+L+'">'+
@@ -222,25 +210,32 @@ function heartSVG(day,L,mode,anim,hd,custom){
   '<g class="wave w2"><path d="'+wv+'" fill="url(#lq)" opacity=".5" transform="translate(-30 -3)"/></g>'+
   '<g class="wave w1"><path d="'+wv+'" fill="url(#lq)"/></g>'+b+'</g>'+
   '<ellipse cx="62" cy="52" rx="16" ry="8" fill="#fff" opacity=".28" transform="rotate(-35 62 52)"/></g>'+
-  '<path class="hout'+(anim?' go':'')+'" pathLength="1" d="'+HP+'" fill="none" stroke="url(#hs)" stroke-width="4" stroke-linejoin="round"/>'+
+  '<path class="hout'+(anim?' go':'')+'" pathLength="1" d="'+HP+'" fill="none" stroke="url(#hs)" stroke-width="4.5" stroke-linejoin="round"/>'+
   (custom?'<text class="ht1 ht'+(anim?' go':'')+'" x="100" y="96">'+custom.t1+'</text><text class="ht2 small ht'+(anim?' go':'')+'" x="100" y="136">'+custom.t2+'</text>':'<text class="ht1 ht'+(anim?' go':'')+'" x="100" y="92">день</text><text class="ht2 ht'+(anim?' go':'')+'" id="hnum" x="100" y="136" data-n="'+day+'" data-d="'+(parseFloat(hd)*1000+900)+'">'+(anim?'0':day)+'</text>')+'</svg></div>';
 }
+function headerHTML(){
+  return '<header class="top"><h1><span class="gt">Дракончики</span></h1><div class="sub2">моего котёнка <span class="beat">♥️</span></div><div class="for">Специально для моей любимой жинки</div></header>';
+}
+var ICONS={
+  drop:'<svg viewBox="0 0 24 24"><path d="M12 3C9 8 6 11 6 15a6 6 0 0 0 12 0c0-4-3-7-6-12z"/></svg>',
+  sun:'<svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="4"/><path d="M12 2v3M12 19v3M2 12h3M19 12h3M5 5l2 2M17 17l2 2M19 5l-2 2M7 17l-2 2"/></svg>',
+  heart:'<svg viewBox="0 0 24 24"><path d="M12 20C4 14 3 8.5 7 6.5c2.2-1 4 .3 5 2.2 1-1.9 2.8-3.2 5-2.2 4 2 3 7.5-5 13.5z"/></svg>',
+  check:'<svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="9"/><path d="M8 12.5l3 3 5-6"/></svg>'
+};
 function render(){
   if(!starts.length){
     firstRender=false;
     var T0=todayT();
-    var fl='';for(var q=0;q<10;q++){fl+='<span class="hf" style="left:'+(4+q*10)+'%;font-size:'+(14+(q*7)%16)+'px;animation-duration:'+(11+(q*3)%7)+'s;animation-delay:'+(-(q*2.3))+'s;--sx:'+((q%2?1:-1)*(20+q*6))+'px;--rot:'+((q%2?1:-1)*25)+'deg;'+(q%3===1?'color:#d9a64a':'')+'">♥️</span>';}
-    var star='<svg viewBox="0 0 24 24"><polygon points="12,1 14.6,8 22,6 17,12 22,18 14.6,16 12,23 9.4,16 2,18 7,12 2,6 9.4,8" fill="#d9a64a"/></svg>';
+    var fl='';for(var q=0;q<10;q++){fl+='<span class="hf" style="left:'+(4+q*10)+'%;font-size:'+(14+(q*7)%16)+'px;animation-duration:'+(11+(q*3)%7)+'s;animation-delay:'+(-(q*2.3))+'s;--sx:'+((q%2?1:-1)*(20+q*6))+'px;--rot:'+((q%2?1:-1)*25)+'deg;'+(q%3===1?'color:#ebc070':'')+'">♥️</span>';}
     var chips=[[0,'Сегодня'],[1,'Вчера'],[3,'3 дня назад'],[7,'Неделю назад']].map(function(x){return '<button class="chip" data-act="chip" data-off="'+x[0]+'">'+x[1]+'</button>';}).join('');
-    document.getElementById('root').innerHTML='<div class="floaters" aria-hidden="true">'+fl+'</div><header><h1>Дракончики моего котёнка <span class="beat">♥️</span></h1><div class="for">Специально для моей любимой жинки</div></header>'+
-      heartSVG(1,28,'normal',true,'0.2s',{pct:0.4,t1:'привет',t2:'любимая'})+
-      '<div class="card welcome"><h2>Давай начнём</h2><div class="sub">Когда начались последние месячные?</div>'+
+    document.getElementById('root').innerHTML='<div class="floaters" aria-hidden="true">'+fl+'</div>'+headerHTML()+
+      '<div class="now">'+heartSVG(1,28,'normal',true,'0.2s',{pct:0.42,t1:'привет',t2:'любимая'})+'</div>'+
+      '<div class="card welcome"><h3>Давай начнём</h3><div class="sub">Когда начались последние месячные?</div>'+
       '<div class="chips">'+chips+'</div>'+
-      '<input type="date" class="bigdate" id="d" value="'+iso(T0)+'" aria-label="Дата начала месячных"></div>'+
-      (msg?'<div class="ok">'+msg+'</div>':'')+
-      '<button class="main" data-act="other">Записать и начать ♥️</button>'+
-      '<div class="feats"><div class="feat">'+star+'<b>Прогноз</b>месячные и овуляция</div><div class="feat">'+star+'<b>Лучшие дни</b>для планирования</div><div class="feat">'+star+'<b>Календарь</b>всё на виду</div></div>'+
-      '<div class="sub" style="text-align:center">Записи хранятся только на этом телефоне.</div>';
+      '<input type="date" class="bigdate" id="d" value="'+iso(T0)+'" aria-label="Дата начала месячных">'+
+      (msg?'<div class="ok" style="margin-bottom:12px">'+msg+'</div>':'')+
+      '<button class="main" data-act="other">Записать и начать</button></div>'+
+      '<div class="sub" style="text-align:center">Дальше достаточно одной кнопки, когда начинаются новые месячные.<br>Записи хранятся только на этом телефоне.</div>';
     return;
   }
   var c=calc(),T=c.T,cur=c.cur,day=Math.round((T-c.last)/DAY)+1,phase,sub='';
@@ -249,26 +244,29 @@ function render(){
   else if(T<cur.ov-5*DAY)phase='До фертильных дней';
   else if(T<=cur.ov+DAY)phase=T===cur.ov?'Скорее всего день овуляции':'Фертильные дни';
   else phase='После овуляции';
-
   var inFertNow=T>=cur.ov-5*DAY&&T<=cur.ov+DAY;
-  var h='<header><h1>Дракончики моего котёнка <span class="beat">♥️</span></h1><div class="for">Специально для моей любимой жинки</div></header>';
+  var till=Math.round((cur.next-T)/DAY);
+  var h=headerHTML();
   var mode=(phase==='Месячные')?'menses':(inFertNow?'fert':'normal');
-  h+='<div class="card now">'+heartSVG(day,c.L,mode,heartAnim,firstRender?'1.5s':'0s')+'<div class="phase">'+phase+'</div>'+(sub?'<div class="sub">'+esc(sub)+'</div>':'')+(inFertNow?'<div><span class="pill">Фертильное окно, лучшие дни</span></div>':'')+'<div class="sub">день '+day+' из ~'+c.L+'</div></div>';
+  h+='<div class="now">'+heartSVG(day,c.L,mode,heartAnim,firstRender?'1.5s':'0s')+'<div class="phase">'+phase+'</div>'+
+     (till>0?'<div><span class="pill rose">до месячных '+days(till)+'</span></div>':'')+
+     (inFertNow?'<div><span class="pill">Фертильное окно, лучшие дни</span></div>':'')+
+     (sub?'<div class="sub">'+esc(sub)+'</div>':'')+'</div>';
   h+='<button class="main" data-act="today">Месячные начались сегодня</button>';
   if(msg)h+='<div class="ok">'+msg+(justAdded?'<div class="row2"><button class="mini ghost" data-act="editLast">Изменить дату</button><button class="mini ghost" data-act="undo">Отменить запись</button></div>':'')+'</div>';
-  h+='<div class="date-row"><input type="date" id="d" value="'+iso(T)+'" aria-label="Дата начала месячных"><button data-act="other">Записать эту дату</button></div>';
+  h+='<details class="more"><summary>Начались в другой день?</summary><div class="date-row"><input type="date" id="d" value="'+iso(T)+'" aria-label="Дата начала месячных"><button data-act="other">Записать</button></div></details>';
 
   h+='<h2>Что будет дальше</h2><div class="grid2">';
-  h+='<div class="card"><div class="k">Следующие месячные</div><div class="big">'+fmt(cur.next)+'</div></div>';
-  h+='<div class="card"><div class="k">Овуляция примерно</div><div class="big">'+fmt(cur.ov)+'</div></div>';
-  h+='<div class="card"><div class="k">Лучшие дни для малыша</div><div class="big" style="font-size:17px">'+fmt(cur.ov-5*DAY)+' – '+fmt(cur.ov+DAY)+'</div></div>';
-  h+='<div class="card"><div class="k">Тест на беременность</div><div class="big">с '+fmt(cur.next+DAY)+'</div></div>';
+  h+='<div class="card icard">'+ICONS.drop+'<div class="k">Следующие месячные</div><div class="big">'+fmt(cur.next).slice(0,5)+'</div><div class="sub">'+fmt(cur.next).slice(6)+'</div></div>';
+  h+='<div class="card icard">'+ICONS.sun+'<div class="k">Овуляция примерно</div><div class="big">'+fmt(cur.ov).slice(0,5)+'</div><div class="sub">'+fmt(cur.ov).slice(6)+'</div></div>';
+  h+='<div class="card icard">'+ICONS.heart+'<div class="k">Лучшие дни для малыша</div><div class="big" style="font-size:19px">'+fmt(cur.ov-5*DAY).slice(0,5)+' – '+fmt(cur.ov+DAY).slice(0,5)+'</div><div class="sub">'+fmt(cur.ov+DAY).slice(6)+'</div></div>';
+  h+='<div class="card icard">'+ICONS.check+'<div class="k">Тест на беременность</div><div class="big">с '+fmt(cur.next+DAY).slice(0,5)+'</div><div class="sub">'+fmt(cur.next+DAY).slice(6)+'</div></div>';
   h+='</div>';
-  h+='<div class="sub">'+(c.lens.length?'Считаем по твоим прошлым циклам: '+days(c.L)+'.':'Пока считаем цикл в '+days(c.L)+'. Когда запишешь следующие месячные, станет точнее.')+' Даты примерные.</div>';
+  h+='<div class="sub" style="text-align:center">'+(c.lens.length?'Считаю по твоим прошлым циклам: '+days(c.L)+'.':'Пока считаю цикл в '+days(c.L)+'. Станет точнее после следующих месячных.')+' Даты примерные.</div>';
 
   var first=Date.UTC(calY,calM,1),dim=new Date(Date.UTC(calY,calM+1,0)).getUTCDate(),off=(new Date(first).getUTCDay()+6)%7;
   h+='<div class="cal-head"><button class="arrow" data-act="prev" aria-label="Назад">‹</button><h2>'+MONTHS[calM]+' '+calY+'</h2><button class="arrow" data-act="next" aria-label="Вперёд">›</button></div>';
-  h+='<div class="card"><div class="dow"><span>Пн</span><span>Вт</span><span>Ср</span><span>Чт</span><span>Пт</span><span>Сб</span><span>Вс</span></div><div class="cells" style="margin-top:4px">';
+  h+='<div class="card"><div class="dow"><span>Пн</span><span>Вт</span><span>Ср</span><span>Чт</span><span>Пт</span><span>Сб</span><span>Вс</span></div><div class="cells">';
   for(var i=0;i<off;i++)h+='<div class="cell out"></div>';
   for(var d=1;d<=dim;d++){
     var t=Date.UTC(calY,calM,d),cls='cell';
@@ -276,7 +274,7 @@ function render(){
     if(t===T)cls+=' today';
     h+='<div class="'+cls+'">'+d+'</div>';
   }
-  h+='</div><div class="legend"><span style="--c:var(--period)">месячные</span><span style="--c:var(--fert)">фертильные дни</span><span style="--c:var(--ov)">овуляция</span></div></div>';
+  h+='</div><div class="legend"><span style="--c:var(--period)">месячные</span><span style="--c:rgba(235,192,112,.4)">фертильные дни</span><span style="--c:var(--ov)">овуляция</span></div></div>';
 
   h+='<h2>Мои месячные</h2><div class="card hist">';
   c.s.slice().reverse().forEach(function(t,idx,arr){
