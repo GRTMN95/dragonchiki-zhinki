@@ -125,9 +125,30 @@ body::before{content:"";position:fixed;inset:-20%;z-index:-1;pointer-events:none
 .fly{position:fixed;z-index:50;pointer-events:none;font-size:22px;animation:floatup 1.5s cubic-bezier(.2,.7,.3,1) forwards}
 .ok{animation:rise .5s cubic-bezier(.2,.7,.2,1) both}
 @media (prefers-reduced-motion:reduce){*,*::before,*::after{animation:none!important;transition:none!important}}
+
+/* splash + smoother heart */
+#splash{position:fixed;inset:0;z-index:100;background:radial-gradient(circle at 50% 40%,#8a1c3d,#4a0f22 60%,#240710);display:flex;flex-direction:column;align-items:center;justify-content:center;gap:18px;animation:splashout .8s ease 1.5s forwards}
+@keyframes splashout{to{opacity:0;visibility:hidden}}
+#splash svg{width:130px;height:auto;overflow:visible;animation:splashpulse 1.4s ease-in-out .9s both}
+@keyframes splashpulse{0%{transform:scale(1)}50%{transform:scale(1.09)}100%{transform:scale(1)}}
+#splash .o{fill:none;stroke:#e0ab52;stroke-width:4;stroke-linejoin:round;stroke-dasharray:1;stroke-dashoffset:1;animation:draw 1.1s cubic-bezier(.5,0,.2,1) .15s forwards}
+#splash .f{fill:#8a1b3a;opacity:0;animation:fadeIn .6s ease .9s forwards}
+#splash .t{color:#f7dca0;font-family:var(--display);font-weight:700;font-size:22px;letter-spacing:.02em;opacity:0;animation:fadeIn .7s ease .8s forwards}
+@keyframes draw{to{stroke-dashoffset:0}}
+@keyframes fadeIn{to{opacity:1}}
+@keyframes fadeEmpty{from{opacity:0}to{opacity:.6}}
+@keyframes pop{from{opacity:0;transform:scale(.78)}to{opacity:1;transform:none}}
+.heartbox.go{animation:pop 1s cubic-bezier(.34,1.4,.64,1) var(--hd,0s) both}
+.hempty.go{animation:fadeEmpty .9s ease var(--hd,0s) both}
+.hout.go{stroke-dasharray:1;animation:draw 1.2s cubic-bezier(.5,0,.2,1) var(--hd,0s) both}
+.liq.go{animation:fillup 2.3s cubic-bezier(.33,1,.68,1) calc(var(--hd,0s) + .9s) both}
+.ht1,.ht2{transition:opacity .4s}
+.ht.go{opacity:0;animation:fadeIn .8s ease calc(var(--hd,0s) + .8s) forwards}
+@media (prefers-reduced-motion:reduce){#splash{display:none}}
 </style>
 </head>
 <body>
+<div id="splash" aria-hidden="true"><svg viewBox="0 0 200 190"><path class="f" d="M100 176 C16 114 4 50 50 26 C77 13 98 30 100 52 C102 30 123 13 150 26 C196 50 184 114 100 176 Z"/><path class="o" pathLength="1" d="M100 176 C16 114 4 50 50 26 C77 13 98 30 100 52 C102 30 123 13 150 26 C196 50 184 114 100 176 Z"/></svg><div class="t">Дракончики</div></div>
 <div id="root"></div>
 <script>
 (function(){
@@ -170,26 +191,27 @@ function calc(){
   return {T:T,s:s,lens:lens,L:L,last:last,period:period,pred:pred,fert:fert,ovs:ovs,rows:rows,cur:cur};
 }
 
-function heartSVG(day,L,mode,anim){
+function heartSVG(day,L,mode,anim,hd){
   var HP='M100 176 C16 114 4 50 50 26 C77 13 98 30 100 52 C102 30 123 13 150 26 C196 50 184 114 100 176 Z';
   var pct=Math.max(0.07,Math.min(1,day/L)),top=Math.round(176-pct*150),depth=176-top;
   var cols=mode==='menses'?['#d63a5a','#7a0f2a']:mode==='fert'?['#e0a050','#8a1b3a']:['#b3294d','#6a0f27'];
   var wv='M0 0 Q25 -9 50 0 T100 0 T150 0 T200 0 T250 0 T300 0 T350 0 T400 0 V230 H0 Z';
   var b='';[[62,0],[92,1.3],[118,2.4],[142,0.7],[78,3.1]].forEach(function(p,i){b+='<circle class="bub" cx="'+p[0]+'" cy="'+(depth-8)+'" r="'+(2.2+i%3)+'" style="--rise:'+Math.max(depth-30,20)+'px;animation-delay:'+p[1]+'s"/>';});
-  return '<div class="heartbox"><svg viewBox="0 0 200 190" class="heart '+mode+'" role="img" aria-label="День цикла '+day+' из '+L+'">'+
+  return '<div class="heartbox'+(anim?' go':'')+'" style="--hd:'+hd+'"><svg viewBox="0 0 200 190" class="heart '+mode+'" role="img" aria-label="День цикла '+day+' из '+L+'">'+
   '<defs><clipPath id="hc"><path d="'+HP+'"/></clipPath>'+
   '<linearGradient id="lq" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="'+cols[0]+'"/><stop offset="1" stop-color="'+cols[1]+'"/></linearGradient>'+
   '<linearGradient id="hs" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#fbe7b5"/><stop offset=".5" stop-color="#d9a64a"/><stop offset="1" stop-color="#a86f25"/></linearGradient></defs>'+
-  '<path class="hempty" d="'+HP+'"/>'+
+  '<path class="hempty'+(anim?' go':'')+'" d="'+HP+'"/>'+
   '<g clip-path="url(#hc)"><g class="liq'+(anim?' go':'')+'" style="--to:'+top+'px">'+
   '<g class="wave w2"><path d="'+wv+'" fill="url(#lq)" opacity=".5" transform="translate(-30 -3)"/></g>'+
   '<g class="wave w1"><path d="'+wv+'" fill="url(#lq)"/></g>'+b+'</g>'+
   '<ellipse cx="62" cy="52" rx="16" ry="8" fill="#fff" opacity=".28" transform="rotate(-35 62 52)"/></g>'+
-  '<path d="'+HP+'" fill="none" stroke="url(#hs)" stroke-width="4" stroke-linejoin="round"/>'+
-  '<text class="ht1" x="100" y="92">день</text><text class="ht2" id="hnum" x="100" y="136" data-n="'+day+'">'+(anim?'0':day)+'</text></svg></div>';
+  '<path class="hout'+(anim?' go':'')+'" pathLength="1" d="'+HP+'" fill="none" stroke="url(#hs)" stroke-width="4" stroke-linejoin="round"/>'+
+  '<text class="ht1 ht'+(anim?' go':'')+'" x="100" y="92">день</text><text class="ht2 ht'+(anim?' go':'')+'" id="hnum" x="100" y="136" data-n="'+day+'" data-d="'+(parseFloat(hd)*1000+900)+'">'+(anim?'0':day)+'</text></svg></div>';
 }
 function render(){
   if(!starts.length){
+    firstRender=false;
     var T0=todayT();
     document.getElementById('root').innerHTML='<header><h1>Дракончики моего котёнка <span class="beat">♥️</span></h1><div class="for">Специально для моей любимой жинки</div></header>'+
       '<div class="card"><div class="k">Первый шаг</div><div class="big" style="font-size:19px;margin-bottom:12px">Когда начались последние месячные?</div>'+
@@ -207,7 +229,7 @@ function render(){
   var inFertNow=T>=cur.ov-5*DAY&&T<=cur.ov+DAY;
   var h='<header><h1>Дракончики моего котёнка <span class="beat">♥️</span></h1><div class="for">Специально для моей любимой жинки</div></header>';
   var mode=(phase==='Месячные')?'menses':(inFertNow?'fert':'normal');
-  h+='<div class="card now">'+heartSVG(day,c.L,mode,heartAnim)+'<div class="phase">'+phase+'</div>'+(sub?'<div class="sub">'+esc(sub)+'</div>':'')+(inFertNow?'<div><span class="pill">Фертильное окно, лучшие дни</span></div>':'')+'<div class="sub">день '+day+' из ~'+c.L+'</div></div>';
+  h+='<div class="card now">'+heartSVG(day,c.L,mode,heartAnim,firstRender?'1.5s':'0s')+'<div class="phase">'+phase+'</div>'+(sub?'<div class="sub">'+esc(sub)+'</div>':'')+(inFertNow?'<div><span class="pill">Фертильное окно, лучшие дни</span></div>':'')+'<div class="sub">день '+day+' из ~'+c.L+'</div></div>';
   h+='<button class="main" data-act="today">Месячные начались сегодня</button>';
   if(msg)h+='<div class="ok">'+msg+(justAdded?'<div class="row2"><button class="mini ghost" data-act="editLast">Изменить дату</button><button class="mini ghost" data-act="undo">Отменить запись</button></div>':'')+'</div>';
   h+='<div class="date-row"><input type="date" id="d" value="'+iso(T)+'" aria-label="Дата начала месячных"><button data-act="other">Записать эту дату</button></div>';
@@ -245,15 +267,14 @@ function render(){
   if(firstRender){
     firstRender=false;
     root.classList.add('enter');
-    Array.prototype.forEach.call(root.children,function(el,i){el.style.animationDelay=(i*80)+'ms';});
-    setTimeout(function(){root.classList.remove('enter');},1800);
+    Array.prototype.forEach.call(root.children,function(el,i){el.style.animationDelay=(1500+i*80)+'ms';});
+    setTimeout(function(){root.classList.remove('enter');},3600);
   }
   if(heartAnim){
     heartAnim=false;
     var nEl=document.getElementById('hnum');
-    if(nEl){var tgt=parseInt(nEl.getAttribute('data-n'),10),t0=null;
-      (function step(ts){if(t0===null)t0=ts;var p=Math.min((ts-t0)/1800,1);nEl.textContent=Math.round(tgt*(1-Math.pow(1-p,3)));if(p<1)requestAnimationFrame(step);else nEl.textContent=tgt;})(performance.now?performance.now():0);
-      requestAnimationFrame(function(ts){});
+    if(nEl){var tgt=parseInt(nEl.getAttribute('data-n'),10),dl=parseFloat(nEl.getAttribute('data-d'))||0,t0=null;
+      (function step(ts){if(t0===null)t0=ts;var p=Math.min(Math.max((ts-t0-dl)/2300,0),1);nEl.textContent=Math.round(tgt*(1-Math.pow(1-p,3)));if(p<1)requestAnimationFrame(step);else nEl.textContent=tgt;})(performance.now());
     }
   }
   if(calAnim){var cc=root.querySelector('.cells');if(cc){cc.parentNode.style.setProperty('--dx',calAnim==='next'?'24px':'-24px');cc.parentNode.classList.add('swap');}calAnim='';}
