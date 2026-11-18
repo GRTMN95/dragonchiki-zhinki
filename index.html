@@ -33,6 +33,16 @@ header.top h1{font-family:var(--display);font-weight:800;font-size:36px;line-hei
 header.top .sub2{font-size:17px;font-weight:600;color:var(--ink);letter-spacing:-.01em}
 .for{margin-top:6px;font-size:13px;font-weight:600;letter-spacing:.04em;background:linear-gradient(100deg,var(--muted) 35%,#fff0cf 50%,var(--muted) 65%);background-size:250% 100%;-webkit-background-clip:text;background-clip:text;color:transparent;-webkit-text-fill-color:transparent;animation:sheen 6s ease-in-out infinite}
 h2{font-size:12px;font-weight:700;letter-spacing:.16em;text-transform:uppercase;color:var(--gold);margin:8px 2px -4px}
+
+.pcard{margin-top:14px}
+.pcard .ph{display:flex;align-items:center;justify-content:space-between;gap:10px}
+.pcard .pv{font-size:34px;font-weight:800;letter-spacing:-.5px;color:var(--gold,#f0c878)}
+.pcard .pv small{font-size:14px;font-weight:600;opacity:.7;margin-left:4px}
+.pcard .pt{font-size:15px;font-weight:700}
+.pcard svg.spark{width:100%;height:74px;display:block;margin-top:10px}
+.pcard .pl{display:flex;justify-content:space-between;font-size:12px;opacity:.65;margin-top:2px}
+.pcard .pn{font-size:13px;opacity:.8;margin-top:8px;line-height:1.35}
+.pcard .pb{margin-top:10px;background:none;border:1px solid var(--line);color:inherit;border-radius:12px;padding:6px 10px;font:inherit;font-size:12px;opacity:.8}
 .card{background:var(--surface);border:1px solid var(--line);border-radius:24px;padding:18px;backdrop-filter:blur(16px);-webkit-backdrop-filter:blur(16px);box-shadow:0 12px 34px rgba(0,0,0,.28),inset 0 1px 0 rgba(255,255,255,.08)}
 .k{font-size:12px;font-weight:600;letter-spacing:.04em;color:var(--muted)}
 .big{font-size:23px;font-weight:800;font-variant-numeric:tabular-nums;letter-spacing:-.02em;margin-top:4px}
@@ -253,6 +263,57 @@ function heartSVG(day,L,mode,anim,hd,custom){
   '<path class="hout'+(anim?' go':'')+'" pathLength="1" d="'+HP+'" fill="none" stroke="url(#hs)" stroke-width="4.5" stroke-linejoin="round"/>'+
   (custom?'<text class="ht1 ht'+(anim?' go':'')+'" x="100" y="96">'+custom.t1+'</text><text class="ht2 small ht'+(anim?' go':'')+'" x="100" y="'+(custom.t1?136:108)+'">'+custom.t2+'</text>':'<text class="ht1 ht'+(anim?' go':'')+'" x="100" y="92">день</text><text class="ht2 ht'+(anim?' go':'')+'" id="hnum" x="100" y="136" data-n="'+day+'" data-d="'+(parseFloat(hd)*1000+900)+'">'+(anim?'0':day)+'</text>')+'</svg></div>';
 }
+
+/* ===== атмосферное давление (Open-Meteo, обновляется само) ===== */
+var PKEY='dragon-pressure-v1',LKEY='dragon-loc-v1';
+var press=null,ploc={lat:55.75,lon:37.62,name:'Москва',own:false};
+try{press=JSON.parse(localStorage.getItem(PKEY)||'null');}catch(e){}
+try{var _l=JSON.parse(localStorage.getItem(LKEY)||'null');if(_l&&_l.lat)ploc=_l;}catch(e){}
+function pesc(x){return String(x).replace(/[&<>"]/g,function(c){return{'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c];});}
+function prHTML(){
+  var h='<div class="card pcard"><div class="k">Атмосферное давление · '+pesc(ploc.own?'у вас':ploc.name)+'</div>';
+  if(!press||!press.v||!press.v.length){return h+'<div class="pn">'+(navigator.onLine===false?'Нет интернета — покажу, когда появится.':'Загружаю…')+'</div></div>';}
+  var v=press.v,n=press.now,cur=v[n],mm=Math.round(cur*0.750062);
+  var back=v[Math.max(0,n-3)],fwd=v[Math.min(v.length-1,n+6)];
+  var dB=(cur-back)*0.750062,dF=(fwd-cur)*0.750062;
+  var tr,note;
+  if(Math.abs(dF)<1.5&&Math.abs(dB)<1.5){tr='Стабильное';note='Сегодня давление почти не меняется.';}
+  else if(dF<=-3||(dF<=-1.5&&dB<=-1.5)){tr='Падает ↓';note=dF<=-3?'В ближайшие часы заметно снизится — берегите себя, больше воды и отдыха.':'Понемногу снижается.';}
+  else if(dF>=3||(dF>=1.5&&dB>=1.5)){tr='Растёт ↑';note=dF>=3?'В ближайшие часы заметно вырастет — метеозависимым может быть непросто.':'Понемногу повышается.';}
+  else{tr=dF<0?'Слегка снижается':'Слегка растёт';note='Небольшие колебания.';}
+  var w=300,hh=70,mn=Math.min.apply(null,v),mx=Math.max.apply(null,v),rg=Math.max(mx-mn,4),pad=6;
+  var pts=v.map(function(x,i){return[(i/(v.length-1))*w,pad+(hh-2*pad)*(1-(x-mn)/rg)];});
+  var d=pts.map(function(q,i){return(i?'L':'M')+q[0].toFixed(1)+' '+q[1].toFixed(1);}).join(' ');
+  var nx=pts[n][0],ny=pts[n][1];
+  var svg='<svg class="spark" viewBox="0 0 '+w+' '+hh+'" preserveAspectRatio="none" aria-hidden="true"><defs><linearGradient id="pg" x1="0" x2="0" y1="0" y2="1"><stop offset="0" stop-color="#f0c878" stop-opacity=".35"/><stop offset="1" stop-color="#f0c878" stop-opacity="0"/></linearGradient></defs><path d="'+d+' L'+w+' '+hh+' L0 '+hh+'Z" fill="url(#pg)"/><path d="'+d+'" fill="none" stroke="#f0c878" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" vector-effect="non-scaling-stroke"/><line x1="'+nx+'" x2="'+nx+'" y1="0" y2="'+hh+'" stroke="#fff" stroke-opacity=".35" stroke-dasharray="3 3" vector-effect="non-scaling-stroke"/></svg>';
+  h+='<div class="ph"><div class="pv">'+mm+'<small>мм рт. ст.</small></div><div class="pt">'+tr+'</div></div>'+svg+'<div class="pl"><span>вчера</span><span>сейчас</span><span>завтра</span></div><div class="pn">'+note+'</div>';
+  h+='<button class="pb" data-act="geo">'+(ploc.own?'Обновить моё местоположение':'Показать для моего места')+'</button></div>';
+  return h;
+}
+function paintPress(){var el=document.getElementById('pr');if(el)el.innerHTML=prHTML();}
+function loadPress(force){
+  if(!force&&press&&press.loc===ploc.lat+','+ploc.lon&&Date.now()-press.ts<30*60*1000)return;
+  var u='https://api.open-meteo.com/v1/forecast?latitude='+ploc.lat+'&longitude='+ploc.lon+'&hourly=pressure_msl&past_days=1&forecast_days=2&timezone=auto';
+  fetch(u).then(function(r){return r.json();}).then(function(j){
+    var t=j.hourly.time,v=j.hourly.pressure_msl,off=(j.utc_offset_seconds||0)*1000;
+    var nowLocal=new Date(Date.now()+off).toISOString().slice(0,13),n=0;
+    for(var i=0;i<t.length;i++){if(t[i].slice(0,13)<=nowLocal)n=i;}
+    var a=Math.max(0,n-24),b=Math.min(v.length,n+25);
+    press={v:v.slice(a,b),now:n-a,ts:Date.now(),loc:ploc.lat+','+ploc.lon};
+    try{localStorage.setItem(PKEY,JSON.stringify(press));}catch(e){}
+    paintPress();
+  }).catch(function(){paintPress();});
+}
+function getGeo(){
+  if(!navigator.geolocation){return;}
+  navigator.geolocation.getCurrentPosition(function(p){
+    ploc={lat:Math.round(p.coords.latitude*100)/100,lon:Math.round(p.coords.longitude*100)/100,name:'моё место',own:true};
+    try{localStorage.setItem(LKEY,JSON.stringify(ploc));}catch(e){}
+    loadPress(true);
+  },function(){},{timeout:10000,maximumAge:3600000});
+}
+document.addEventListener('visibilitychange',function(){if(!document.hidden)loadPress();});
+setInterval(function(){loadPress();},10*60*1000);
 function headerHTML(){
   return '<header class="top"><h1><span class="gt">Дракончики</span></h1><div class="sub2">моего котёнка <span class="beat">♥️</span></div><div class="for">Специально для моей любимой жинки</div></header>';
 }
@@ -333,7 +394,7 @@ function render(){
   var cta='<button class="main" data-act="openSheet">Отметить начало месячных</button>';
   if(view==='cal')h+=banner+calHTML;
   else if(view==='list')h+=banner+listHTML+'<button class="main" data-act="openSheet">Добавить запись</button><div class="foot">С любовью ♥️</div>';
-  else h+=heroH+cta+banner+cardsHTML;
+  else h+=heroH+cta+banner+cardsHTML+'<div id="pr">'+prHTML()+'</div>';
 
   var root=document.getElementById('root');
   root.innerHTML=h;
@@ -412,6 +473,7 @@ document.addEventListener('click',function(e){
   var el=e.target.closest('[data-act]');if(!el)return;
   var a=el.getAttribute('data-act');
   if(a==='tab'){view=el.getAttribute('data-v');msg='';justAdded=null;editing=null;deleting=null;if(view==='home')heartAnim=true;window.scrollTo(0,0);render();}
+  else if(a==='geo'){getGeo();}
   else if(a==='openSheet'){sheet=true;msg='';justAdded=null;render();}
   else if(a==='closeSheet'){sheet=false;msg='';render();}
   else if(a==='heart'){
@@ -440,6 +502,7 @@ document.addEventListener('click',function(e){
   else if(a==='next'){calAnim='next';calM++;if(calM>11){calM=0;calY++;}render();}
 });
 render();
+loadPress();
 })();
 </script>
 </body>
