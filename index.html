@@ -221,6 +221,7 @@ function days(n){return n+' '+plural(n,'день','дня','дней');}
 
 var starts=[];
 try{var r=localStorage.getItem(KEY);if(r){var o=JSON.parse(r);if(Array.isArray(o)&&o.length)starts=o;}}catch(e){}
+try{if(!localStorage.getItem('dragon-seeded-v1')){localStorage.setItem('dragon-seeded-v1','1');if(!starts.length){starts=['2026-10-25'];localStorage.setItem(KEY,JSON.stringify(starts));}}}catch(e){if(!starts.length)starts=['2026-10-25'];}
 function save(){try{localStorage.setItem(KEY,JSON.stringify(starts));}catch(e){}}
 
 var view='home',sheet=false,heartAnim=true,editing=null,deleting=null,firstRender=true,calAnim='';
