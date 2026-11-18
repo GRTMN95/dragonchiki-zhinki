@@ -171,11 +171,29 @@ input[type=date]::-webkit-calendar-picker-indicator{opacity:.8;filter:invert(.78
 @keyframes popout{0%{opacity:0;transform:translate(0,0) scale(.3) rotate(0)}10%{opacity:1}70%{opacity:1}100%{opacity:0;transform:translate(var(--dx),var(--dy)) scale(1.1) rotate(var(--r))}}
 .fly2{position:fixed;z-index:50;pointer-events:none;animation:popout 1.5s cubic-bezier(.15,.7,.3,1) forwards}
 .fly2 svg{display:block;filter:drop-shadow(0 3px 6px rgba(60,0,20,.5))}
+
+#root{padding-bottom:132px}
+.tabbar{position:fixed;left:0;right:0;bottom:0;z-index:40;display:flex;justify-content:center;padding:0 14px calc(10px + env(safe-area-inset-bottom));pointer-events:none}
+.tabbar:empty{display:none}
+.tabbar .in{pointer-events:auto;display:flex;gap:4px;width:100%;max-width:420px;background:rgba(40,10,22,.8);-webkit-backdrop-filter:blur(22px);backdrop-filter:blur(22px);border:1px solid var(--line);border-radius:28px;padding:6px;box-shadow:0 14px 36px rgba(0,0,0,.5)}
+.tabbar button{flex:1;background:none;border:0;color:var(--muted);border-radius:22px;padding:8px 4px 7px;display:flex;flex-direction:column;align-items:center;gap:3px;font-size:11.5px;font-weight:700;min-height:56px;transition:background .25s,color .25s}
+.tabbar button svg{width:24px;height:24px;fill:none;stroke:currentColor;stroke-width:1.8;stroke-linecap:round;stroke-linejoin:round}
+.tabbar button[aria-current="true"]{color:#2a0710;background:linear-gradient(135deg,#fbe3a6,#ebc070 55%,#b98337)}
+.scrim{position:fixed;inset:0;z-index:60;background:rgba(10,2,5,.65);-webkit-backdrop-filter:blur(4px);backdrop-filter:blur(4px);animation:fadeIn2 .25s ease both}
+@keyframes fadeIn2{from{opacity:0}to{opacity:1}}
+.sheet{position:fixed;left:0;right:0;bottom:0;z-index:61;max-width:520px;margin:0 auto;background:linear-gradient(180deg,#42102a,#260a16);border:1px solid var(--line);border-bottom:0;border-radius:30px 30px 0 0;padding:14px 18px calc(24px + env(safe-area-inset-bottom));animation:sheetup .4s cubic-bezier(.2,.8,.2,1) both;box-shadow:0 -20px 50px rgba(0,0,0,.5)}
+@keyframes sheetup{from{transform:translateY(100%)}to{transform:none}}
+.sheet .grab{width:44px;height:5px;border-radius:3px;background:rgba(255,255,255,.25);margin:0 auto 16px}
+.sheet h3{font-family:var(--display);font-weight:800;font-size:22px;letter-spacing:-.02em}
+.sheet .actions{display:flex;flex-direction:column;gap:6px;align-items:stretch}
+.sheet .actions .link{text-align:center;text-decoration:none;font-size:16px;padding:12px}
 </style>
 </head>
 <body>
 <div id="splash" aria-hidden="true"><svg viewBox="0 0 200 190"><path class="f" d="M100 176 C16 114 4 50 50 26 C77 13 98 30 100 52 C102 30 123 13 150 26 C196 50 184 114 100 176 Z"/><path class="o" pathLength="1" d="M100 176 C16 114 4 50 50 26 C77 13 98 30 100 52 C102 30 123 13 150 26 C196 50 184 114 100 176 Z"/></svg><div class="t">Дракончики</div></div>
 <div id="root"></div>
+<nav class="tabbar" id="tabbar" aria-label="Разделы"></nav>
+<div id="sheetwrap"></div>
 <script>
 (function(){
 "use strict";
@@ -192,7 +210,7 @@ var starts=[];
 try{var r=localStorage.getItem(KEY);if(r){var o=JSON.parse(r);if(Array.isArray(o)&&o.length)starts=o;}}catch(e){}
 function save(){try{localStorage.setItem(KEY,JSON.stringify(starts));}catch(e){}}
 
-var heartAnim=true,editing=null,deleting=null,firstRender=true,calAnim='';
+var view='home',sheet=false,heartAnim=true,editing=null,deleting=null,firstRender=true,calAnim='';
 var now=new Date(),calY=now.getFullYear(),calM=now.getMonth(),msg='',justAdded=null;
 var PL=5,LUT=14,DEF=28;
 
@@ -247,6 +265,7 @@ var ICONS={
 function render(){
   if(!starts.length){
     firstRender=false;
+    document.getElementById('tabbar').innerHTML='';document.getElementById('sheetwrap').innerHTML='';
     var T0=todayT();
     var fl='';for(var q=0;q<10;q++){fl+='<span class="hf" style="left:'+(4+q*10)+'%;font-size:'+(14+(q*7)%16)+'px;animation-duration:'+(11+(q*3)%7)+'s;animation-delay:'+(-(q*2.3))+'s;--sx:'+((q%2?1:-1)*(20+q*6))+'px;--rot:'+((q%2?1:-1)*25)+'deg;'+(q%3===1?'color:#ebc070':'')+'">♥️</span>';}
     var chips=[[0,'Сегодня'],[1,'Вчера'],[3,'3 дня назад'],[7,'Неделю назад']].map(function(x){return '<button class="chip" data-act="chip" data-off="'+x[0]+'">'+x[1]+'</button>';}).join('');
@@ -270,14 +289,12 @@ function render(){
   var till=Math.round((cur.next-T)/DAY);
   var h=headerHTML();
   var mode=(phase==='Месячные')?'menses':(inFertNow?'fert':'normal');
-  h+='<div class="now">'+heartSVG(day,c.L,mode,heartAnim,firstRender?'1.5s':'0s')+'<div class="phase">'+phase+'</div>'+
+  var heroH='<div class="now">'+heartSVG(day,c.L,mode,heartAnim,firstRender?'1.5s':'0s')+'<div class="phase">'+phase+'</div>'+
      (till>0?'<div><span class="pill rose">до месячных '+days(till)+'</span></div>':'')+
      (inFertNow?'<div><span class="pill">Фертильное окно, лучшие дни</span></div>':'')+
      (sub?'<div class="sub">'+esc(sub)+'</div>':'')+'</div>';
-  h+='<button class="main" data-act="today">Месячные начались сегодня</button>';
-  if(msg)h+='<div class="ok">'+msg+(justAdded?'<div class="row2"><button class="mini ghost" data-act="editLast">Изменить дату</button><button class="mini ghost" data-act="undo">Отменить запись</button></div>':'')+'</div>';
-  h+='<details class="more"><summary>Начались в другой день?</summary><div class="date-row"><input type="date" id="d" value="'+iso(T)+'" aria-label="Дата начала месячных"><button data-act="other">Записать</button></div></details>';
-
+  var banner=(msg&&!sheet)?'<div class="ok">'+msg+(justAdded?'<div class="row2"><button class="mini ghost" data-act="editLast">Изменить дату</button><button class="mini ghost" data-act="undo">Отменить запись</button></div>':'')+'</div>':'';
+  var cardsHTML=(function(){var h='';
   h+='<h2>Что будет дальше</h2><div class="grid2">';
   h+='<div class="card icard">'+ICONS.drop+'<div class="k">Следующие месячные</div><div class="big">'+fmt(cur.next).slice(0,5)+'</div><div class="sub">'+fmt(cur.next).slice(6)+'</div></div>';
   h+='<div class="card icard">'+ICONS.sun+'<div class="k">Овуляция примерно</div><div class="big">'+fmt(cur.ov).slice(0,5)+'</div><div class="sub">'+fmt(cur.ov).slice(6)+'</div></div>';
@@ -286,6 +303,9 @@ function render(){
   h+='</div>';
   h+='<div class="sub" style="text-align:center">'+(c.lens.length?'Считаю по твоим прошлым циклам: '+days(c.L)+'.':'Пока считаю цикл в '+days(c.L)+'. Станет точнее после следующих месячных.')+' Даты примерные.</div>';
 
+
+    return h;})();
+  var calHTML=(function(){var h='';
   var first=Date.UTC(calY,calM,1),dim=new Date(Date.UTC(calY,calM+1,0)).getUTCDate(),off=(new Date(first).getUTCDay()+6)%7;
   h+='<div class="cal-head"><button class="arrow" data-act="prev" aria-label="Назад">‹</button><h2>'+MONTHS[calM]+' '+calY+'</h2><button class="arrow" data-act="next" aria-label="Вперёд">›</button></div>';
   h+='<div class="card"><div class="dow"><span>Пн</span><span>Вт</span><span>Ср</span><span>Чт</span><span>Пт</span><span>Сб</span><span>Вс</span></div><div class="cells">';
@@ -298,6 +318,9 @@ function render(){
   }
   h+='</div><div class="legend"><span style="--c:var(--period)">месячные</span><span style="--c:rgba(235,192,112,.4)">фертильные дни</span><span style="--c:var(--ov)">овуляция</span></div></div>';
 
+
+    return h;})();
+  var listHTML=(function(){var h='';
   h+='<h2>Мои месячные</h2><div class="card hist">';
   c.s.slice().reverse().forEach(function(t,idx,arr){
     var ds=iso(t),prev=arr[idx+1];
@@ -305,9 +328,25 @@ function render(){
     if(deleting===ds){h+='<div class="edit"><span>Удалить запись '+fmt(t)+'?</span><button class="mini danger" data-act="doDel">Да, удалить</button><button class="mini ghost" data-act="cancel">Нет</button></div>';return;}
     h+='<div><span>'+fmt(t)+'<br><span class="k">'+(prev?'цикл '+days(Math.round((t-prev)/DAY)):'первая запись')+'</span></span><span class="acts"><button class="mini ghost" data-act="edit" data-d="'+ds+'">Изменить</button><button class="mini ghost" data-act="del" data-d="'+ds+'">Удалить</button></span></div>';
   });
-  h+='</div><div class="foot">С любовью ♥️</div>';
+  h+='</div>';
+    return h;})();
+  var cta='<button class="main" data-act="openSheet">Отметить начало месячных</button>';
+  if(view==='cal')h+=banner+calHTML;
+  else if(view==='list')h+=banner+listHTML+'<button class="main" data-act="openSheet">Добавить запись</button><div class="foot">С любовью ♥️</div>';
+  else h+=heroH+cta+banner+cardsHTML;
+
   var root=document.getElementById('root');
   root.innerHTML=h;
+  var TI={home:'<svg viewBox="0 0 24 24"><path d="M12 20C4 14 3 8.5 7 6.5c2.2-1 4 .3 5 2.2 1-1.9 2.8-3.2 5-2.2 4 2 3 7.5-5 13.5z"/></svg>',cal:'<svg viewBox="0 0 24 24"><rect x="3.5" y="5" width="17" height="15" rx="3"/><path d="M8 3v4M16 3v4M3.5 10h17"/></svg>',list:'<svg viewBox="0 0 24 24"><path d="M8 7h12M8 12h12M8 17h12"/><circle cx="4.5" cy="7" r="1"/><circle cx="4.5" cy="12" r="1"/><circle cx="4.5" cy="17" r="1"/></svg>'};
+  var tb='<div class="in">';
+  [['home','Главная'],['cal','Календарь'],['list','Месячные']].forEach(function(t){tb+='<button data-act="tab" data-v="'+t[0]+'"'+(view===t[0]?' aria-current="true"':'')+'>'+TI[t[0]]+'<span>'+t[1]+'</span></button>';});
+  document.getElementById('tabbar').innerHTML=tb+'</div>';
+  var sw='';
+  if(sheet){
+    var chipsS=[[0,'Сегодня'],[1,'Вчера'],[3,'3 дня назад'],[7,'Неделю назад']].map(function(x,ix){return '<button class="chip'+(ix===0?' on':'')+'" data-act="chip" data-off="'+x[0]+'">'+x[1]+'</button>';}).join('');
+    sw='<div class="scrim" data-act="closeSheet"></div><div class="sheet" role="dialog" aria-modal="true" aria-label="Запись месячных"><div class="grab"></div><h3>Когда начались месячные?</h3><div class="sub" style="margin-top:4px">Выбери день и подтверди. Пока не нажмёшь «Записать», ничего не сохранится.</div><div class="chips">'+chipsS+'</div><input type="date" class="bigdate" id="d" value="'+iso(T)+'" aria-label="Дата начала месячных">'+(msg?'<div class="ok" style="margin-bottom:12px">'+msg+'</div>':'')+'<div class="actions"><button class="main" data-act="other">Записать</button><button class="link" data-act="closeSheet">Отмена</button></div></div>';
+  }
+  document.getElementById('sheetwrap').innerHTML=sw;
   if(firstRender){
     firstRender=false;
     root.classList.add('enter');
@@ -327,7 +366,7 @@ function render(){
 function add(dateStr){
   if(!dateStr){msg='Выбери дату.';justAdded=null;render();return;}
   if(starts.indexOf(dateStr)>=0){msg='Эта дата уже записана.';justAdded=null;render();return;}
-  starts.push(dateStr);starts.sort();save();
+  starts.push(dateStr);starts.sort();save();sheet=false;view='home';
   heartAnim=true;justAdded=dateStr;msg='Записано: '+fmt(D(dateStr))+'. Прогноз обновлён ♥️';
   var t=D(dateStr);calY=new Date(t).getUTCFullYear();calM=new Date(t).getUTCMonth();
   render();window.scrollTo(0,0);
@@ -372,7 +411,9 @@ function popHearts(x,y){
 document.addEventListener('click',function(e){
   var el=e.target.closest('[data-act]');if(!el)return;
   var a=el.getAttribute('data-act');
-  if(a==='today')add(iso(todayT()));
+  if(a==='tab'){view=el.getAttribute('data-v');msg='';justAdded=null;editing=null;deleting=null;if(view==='home')heartAnim=true;window.scrollTo(0,0);render();}
+  else if(a==='openSheet'){sheet=true;msg='';justAdded=null;render();}
+  else if(a==='closeSheet'){sheet=false;msg='';render();}
   else if(a==='heart'){
     var sv=el.querySelector('svg.heart');if(sv){sv.classList.remove('tap');void sv.getBoundingClientRect();sv.classList.add('tap');setTimeout(function(){sv.classList.remove('tap');},700);}
     var px=(e.clientX||0),py=(e.clientY||0);
@@ -382,7 +423,7 @@ document.addEventListener('click',function(e){
   else if(a==='chip'){var off=parseInt(el.getAttribute('data-off'),10);var inp=document.getElementById('d');if(inp)inp.value=iso(todayT()-off*DAY);Array.prototype.forEach.call(document.querySelectorAll('.chip'),function(c2){c2.classList.toggle('on',c2===el);});}
   else if(a==='other')add(document.getElementById('d').value);
   else if(a==='undo'){var i=starts.indexOf(justAdded);if(i>=0)starts.splice(i,1);save();justAdded=null;msg='Запись отменена.';render();}
-  else if(a==='editLast'){editing=justAdded;deleting=null;render();var ed=document.getElementById('ed');if(ed)ed.scrollIntoView({block:'center',behavior:'smooth'});}
+  else if(a==='editLast'){editing=justAdded;deleting=null;view='list';render();var ed=document.getElementById('ed');if(ed)ed.scrollIntoView({block:'center',behavior:'smooth'});}
   else if(a==='edit'){editing=el.getAttribute('data-d');deleting=null;msg='';justAdded=null;render();}
   else if(a==='del'){deleting=el.getAttribute('data-d');editing=null;msg='';justAdded=null;render();}
   else if(a==='cancel'){editing=null;deleting=null;render();}
