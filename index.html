@@ -185,6 +185,9 @@ input[type=date]::-webkit-calendar-picker-indicator{opacity:.8;filter:invert(.78
 #root{padding-bottom:132px}
 .tabbar{position:fixed;left:0;right:0;bottom:0;z-index:40;display:flex;justify-content:center;padding:0 14px calc(10px + env(safe-area-inset-bottom));pointer-events:none}
 .tabbar:empty{display:none}
+.bigdate,input[type=date].bigdate{-webkit-appearance:none;appearance:none;display:block;height:auto;min-height:0;padding:16px 12px;line-height:24px;box-sizing:border-box}
+.bigdate::-webkit-date-and-time-value{min-height:24px;text-align:center;margin:0 auto}
+.emptycard{text-align:center;padding:26px 18px}.emptycard h3{margin:0 0 6px;font-size:21px}.emptycard .sub{margin-bottom:16px}
 .tabbar .in{pointer-events:auto;display:flex;gap:4px;width:100%;max-width:420px;background:rgba(40,10,22,.8);-webkit-backdrop-filter:blur(22px);backdrop-filter:blur(22px);border:1px solid var(--line);border-radius:28px;padding:6px;box-shadow:0 14px 36px rgba(0,0,0,.5)}
 .tabbar button{flex:1;background:none;border:0;color:var(--muted);border-radius:22px;padding:8px 4px 7px;display:flex;flex-direction:column;align-items:center;gap:3px;font-size:11.5px;font-weight:700;min-height:56px;transition:background .25s,color .25s}
 .tabbar button svg{width:24px;height:24px;fill:none;stroke:currentColor;stroke-width:1.8;stroke-linecap:round;stroke-linejoin:round}
@@ -326,7 +329,15 @@ var ICONS={
 function render(){
   if(!starts.length){
     firstRender=false;
-    document.getElementById('tabbar').innerHTML='';document.getElementById('sheetwrap').innerHTML='';
+    document.getElementById('sheetwrap').innerHTML='';
+    var TIw={home:'<svg viewBox="0 0 24 24"><path d="M12 20C4 14 3 8.5 7 6.5c2.2-1 4 .3 5 2.2 1-1.9 2.8-3.2 5-2.2 4 2 3 7.5-5 13.5z"/></svg>',cal:'<svg viewBox="0 0 24 24"><rect x="3.5" y="5" width="17" height="15" rx="3"/><path d="M8 3v4M16 3v4M3.5 10h17"/></svg>',list:'<svg viewBox="0 0 24 24"><path d="M8 7h12M8 12h12M8 17h12"/><circle cx="4.5" cy="7" r="1"/><circle cx="4.5" cy="12" r="1"/><circle cx="4.5" cy="17" r="1"/></svg>'};
+    var tbw='<div class="in">';
+    [['home','Главная'],['cal','Календарь'],['list','Месячные']].forEach(function(t){tbw+='<button data-act="tab" data-v="'+t[0]+'"'+(view===t[0]?' aria-current="true"':'')+'>'+TIw[t[0]]+t[1]+'</button>';});
+    document.getElementById('tabbar').innerHTML=tbw+'</div>';
+    if(view!=='home'){
+      document.getElementById('root').innerHTML=headerHTML()+'<div class="card emptycard"><h3>'+(view==='cal'?'Календарь пока пуст':'Записей пока нет')+'</h3><div class="sub">'+(view==='cal'?'Здесь появятся месячные, овуляция и фертильные дни — сразу после первой записи.':'Здесь будет список всех месячных, их можно будет менять и удалять.')+'</div><button class="main" data-act="tab" data-v="home">Сделать первую запись</button></div>';
+      return;
+    }
     var T0=todayT();
     var fl='';for(var q=0;q<10;q++){fl+='<span class="hf" style="left:'+(4+q*10)+'%;font-size:'+(14+(q*7)%16)+'px;animation-duration:'+(11+(q*3)%7)+'s;animation-delay:'+(-(q*2.3))+'s;--sx:'+((q%2?1:-1)*(20+q*6))+'px;--rot:'+((q%2?1:-1)*25)+'deg;'+(q%3===1?'color:#ebc070':'')+'">♥️</span>';}
     var chips=[[0,'Сегодня'],[1,'Вчера'],[3,'3 дня назад'],[7,'Неделю назад']].map(function(x){return '<button class="chip" data-act="chip" data-off="'+x[0]+'">'+x[1]+'</button>';}).join('');
