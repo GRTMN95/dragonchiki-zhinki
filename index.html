@@ -37,11 +37,13 @@ h2{font-size:12px;font-weight:700;letter-spacing:.16em;text-transform:uppercase;
 .pcard{margin-top:14px}
 .pcard .ph{display:flex;align-items:center;justify-content:space-between;gap:10px}
 .pcard .pv{font-size:34px;font-weight:800;letter-spacing:-.5px;color:var(--gold,#f0c878)}
-.pcard .pv small{font-size:14px;font-weight:600;opacity:.7;margin-left:4px}
-.pcard .pt{font-size:15px;font-weight:700}
+.pcard .pv small{white-space:nowrap;font-size:14px;font-weight:600;opacity:.7;margin-left:4px}
+.pcard .pt{font-size:15px;font-weight:700;white-space:nowrap}
 .pcard svg.spark{width:100%;height:74px;display:block;margin-top:10px}
 .pcard .pl{display:flex;justify-content:space-between;font-size:12px;opacity:.65;margin-top:2px}
 .pcard .prow{display:flex;gap:8px;margin-top:10px}.pcard .prow input{flex:1;min-width:0;background:rgba(0,0,0,.25);border:1px solid var(--line);border-radius:12px;color:inherit;font:inherit;font-size:16px;padding:8px 10px;-webkit-appearance:none}.pcard .prow .pb{margin-top:0}
+.pcard .ptabs{display:flex;gap:6px;margin:10px 0 6px}.pcard .ptabs button{flex:1;background:rgba(255,255,255,.05);border:1px solid var(--line);color:var(--muted);border-radius:12px;padding:8px 0;font:inherit;font-size:11px;font-weight:700;white-space:nowrap}.pcard .ptabs button[aria-current="true"]{background:linear-gradient(135deg,#fbe3a6,#ebc070 55%,#b98337);color:#2a0710;border-color:transparent}
+.pcard .phead{font-size:17px;font-weight:800;margin-top:10px}
 .pcard .pn{font-size:13px;opacity:.8;margin-top:8px;line-height:1.35}
 .pcard .pb{margin-top:10px;background:none;border:1px solid var(--line);color:inherit;border-radius:12px;padding:6px 10px;font:inherit;font-size:12px;opacity:.8}
 .card{background:var(--surface);border:1px solid var(--line);border-radius:24px;padding:18px;backdrop-filter:blur(16px);-webkit-backdrop-filter:blur(16px);box-shadow:0 12px 34px rgba(0,0,0,.28),inset 0 1px 0 rgba(255,255,255,.08)}
@@ -130,6 +132,7 @@ button.cell:active{transform:scale(.92)}
 .wfl{position:fixed;inset:0;pointer-events:none;overflow:hidden;z-index:0}
 #root{position:relative;z-index:1}
 #root>.wfl{z-index:0}
+#root>*:not(.wfl){position:relative;z-index:1}
 .wfl span{position:absolute;bottom:-50px;white-space:nowrap;font-family:'MarckS','Marck Script',cursive;font-weight:400;letter-spacing:.5px;opacity:0;animation:wfloat linear infinite;background:linear-gradient(120deg,#fbe3a6,#e8b95a 55%,#b98337);-webkit-background-clip:text;background-clip:text;-webkit-text-fill-color:transparent;filter:drop-shadow(0 0 7px rgba(235,192,112,.35))}
 .wfl span.r{background:linear-gradient(120deg,#ffc2d2,#ff7f9f 55%,#d83f6b);-webkit-background-clip:text;background-clip:text;filter:drop-shadow(0 0 7px rgba(255,111,150,.35))}
 .wfl span.hh{background:none;-webkit-background-clip:border-box;background-clip:border-box;-webkit-text-fill-color:initial;font-family:-apple-system,'SF Pro Text',system-ui,sans-serif;filter:drop-shadow(0 0 10px rgba(168,33,75,.7)) brightness(1.08)}
@@ -297,42 +300,55 @@ function heartSVG(day,L,mode,anim,hd,custom){
 }
 
 /* ===== атмосферное давление (Open-Meteo, обновляется само) ===== */
-var PKEY='dragon-pressure-v2',LKEY='dragon-loc-v1';
+var PKEY='dragon-pressure-v3',LKEY='dragon-loc-v1';
 var pmsg='',press=null,ploc={lat:55.75,lon:37.62,name:'Москва',own:false};
 try{press=JSON.parse(localStorage.getItem(PKEY)||'null');}catch(e){}
 try{var _l=JSON.parse(localStorage.getItem(LKEY)||'null');if(_l&&_l.lat&&!_l.own)ploc=_l;}catch(e){}
 function esc(x){return pesc(x);}
 function pesc(x){return String(x).replace(/[&<>"]/g,function(c){return{'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c];});}
+var pday=0,PD=[[-1,'Вчера'],[0,'Сегодня'],[1,'Завтра'],[2,'Послезавтра']];
+function pgroups(){
+  if(!press||!press.t)return null;var g={},order=[];
+  press.t.forEach(function(t,i){var d=t.slice(0,10);if(!g[d]){g[d]=[];order.push(d);}g[d].push(i);});
+  var ti=order.indexOf(press.td);if(ti<0)return null;
+  return{g:g,order:order,ti:ti};
+}
 function prHTML(){
   var h='<div class="card pcard"><div class="k">Атмосферное давление · '+pesc(ploc.name)+'</div>';
-  if(!press||!press.v||!press.v.length){return h+'<div class="pn">'+(navigator.onLine===false?'Нет интернета — покажу, когда появится.':'Загружаю…')+'</div>'+pctl()+'</div>';}
-  var v=press.v,n=press.now,cur=v[n],mm=Math.round(cur*0.750062);
-  var back=v[Math.max(0,n-3)],fwd=v[Math.min(v.length-1,n+6)];
-  var dB=(cur-back)*0.750062,dF=(fwd-cur)*0.750062;
-  var tr,note;
-  if(Math.abs(dF)<1.5&&Math.abs(dB)<1.5){tr='Стабильное';note='Сегодня давление почти не меняется.';}
-  else if(dF<=-3||(dF<=-1.5&&dB<=-1.5)){tr='Падает ↓';note=dF<=-3?'В ближайшие часы заметно снизится — берегите себя, больше воды и отдыха.':'Понемногу снижается.';}
-  else if(dF>=3||(dF>=1.5&&dB>=1.5)){tr='Растёт ↑';note=dF>=3?'В ближайшие часы заметно вырастет — метеозависимым может быть непросто.':'Понемногу повышается.';}
-  else{tr=dF<0?'Слегка снижается':'Слегка растёт';note='Небольшие колебания.';}
-  var w=300,hh=70,mn=Math.min.apply(null,v),mx=Math.max.apply(null,v),rg=Math.max(mx-mn,4),pad=6;
-  var pts=v.map(function(x,i){return[(i/(v.length-1))*w,pad+(hh-2*pad)*(1-(x-mn)/rg)];});
+  var G=pgroups();
+  if(!G){return h+'<div class="pn">'+(navigator.onLine===false?'Нет интернета — покажу, когда появится.':'Загружаю…')+'</div>'+pctl()+'</div>';}
+  var tabs='<div class="ptabs">'+PD.map(function(x){return '<button data-act="pday" data-d="'+x[0]+'"'+(pday===x[0]?' aria-current="true"':'')+'>'+x[1]+'</button>';}).join('')+'</div>';
+  var di=G.ti+pday,dk=G.order[di];
+  if(!dk){pday=0;return prHTML();}
+  var idx=G.g[dk],v=idx.map(function(i){return press.v[i]*0.750062;});
+  var avg=v.reduce(function(a,b){return a+b;},0)/v.length,mn=Math.min.apply(null,v),mx=Math.max.apply(null,v),swing=mx-mn;
+  var pk=G.order[di-1],chg=0;
+  if(pk){var pv=G.g[pk].map(function(i){return press.v[i]*0.750062;});chg=avg-pv.reduce(function(a,b){return a+b;},0)/pv.length;}
+  var lvl=(swing>=7||Math.abs(chg)>=6)?2:(swing>=3.5||Math.abs(chg)>=3)?1:0;
+  var word=pday<0?'был':pday===0?'':'будет';
+  var tr=lvl===0?'Ровное':(chg<=-1.5?'Снижается ↓':chg>=1.5?'Растёт ↑':'Колеблется');
+  var head,note;
+  if(lvl===0){head=pday===0?'Сегодня давление нормальное':pday<0?'Вчера давление было нормальным':'Давление будет нормальным';note=pday<=0?'Никаких нагрузок для организма быть не должно ♥️':'Скачков не ожидается, нагрузок быть не должно ♥️';}
+  else if(lvl===1){head=pday<0?'Вчера были небольшие колебания':pday===0?'Небольшие колебания':'Будут небольшие колебания';note='Чувствительным людям может быть чуть непросто: больше воды, меньше суеты.';}
+  else{head=pday<0?'Вчера был заметный перепад':pday===0?'Сегодня заметный перепад':'Ожидается заметный перепад';note='Метеозависимым лучше поберечься: отдых, вода, тепло и поменьше нагрузок.';}
+  var w=300,hh=70,pad=6,lo=Math.min(mn,avg-2),hi=Math.max(mx,avg+2),rg=Math.max(hi-lo,4);
+  var pts=v.map(function(x,i){return[(i/(v.length-1))*w,pad+(hh-2*pad)*(1-(x-lo)/rg)];});
   var d=pts.map(function(q,i){return(i?'L':'M')+q[0].toFixed(1)+' '+q[1].toFixed(1);}).join(' ');
-  var nx=pts[n][0],ny=pts[n][1];
-  var svg='<svg class="spark" viewBox="0 0 '+w+' '+hh+'" preserveAspectRatio="none" aria-hidden="true"><defs><linearGradient id="pg" x1="0" x2="0" y1="0" y2="1"><stop offset="0" stop-color="#f0c878" stop-opacity=".35"/><stop offset="1" stop-color="#f0c878" stop-opacity="0"/></linearGradient></defs><path d="'+d+' L'+w+' '+hh+' L0 '+hh+'Z" fill="url(#pg)"/><path d="'+d+'" fill="none" stroke="#f0c878" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" vector-effect="non-scaling-stroke"/><line x1="'+nx+'" x2="'+nx+'" y1="0" y2="'+hh+'" stroke="#fff" stroke-opacity=".35" stroke-dasharray="3 3" vector-effect="non-scaling-stroke"/></svg>';
-  h+='<div class="ph"><div class="pv">'+mm+'<small>мм рт. ст.</small></div><div class="pt">'+tr+'</div></div>'+svg+'<div class="pl"><span>вчера</span><span>сейчас</span><span>завтра</span></div><div class="pn">'+note+'</div>';
+  var mark='';
+  if(pday===0){var ni=Math.max(0,Math.min(idx.length-1,press.nh));mark='<line x1="'+pts[ni][0]+'" x2="'+pts[ni][0]+'" y1="0" y2="'+hh+'" stroke="#fff" stroke-opacity=".35" stroke-dasharray="3 3" vector-effect="non-scaling-stroke"/><circle cx="'+pts[ni][0]+'" cy="'+pts[ni][1]+'" r="4" fill="#f0c878"/>';}
+  var svg='<svg class="spark" viewBox="0 0 '+w+' '+hh+'" preserveAspectRatio="none" aria-hidden="true"><defs><linearGradient id="pg" x1="0" x2="0" y1="0" y2="1"><stop offset="0" stop-color="#f0c878" stop-opacity=".35"/><stop offset="1" stop-color="#f0c878" stop-opacity="0"/></linearGradient></defs><path d="'+d+' L'+w+' '+hh+' L0 '+hh+'Z" fill="url(#pg)"/><path d="'+d+'" fill="none" stroke="#f0c878" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" vector-effect="non-scaling-stroke"/>'+mark+'</svg>';
+  h+=tabs+'<div class="ph"><div class="pv">'+Math.round(avg)+'<small>мм рт. ст.'+(pday===0?'':' · ср.')+'</small></div><div class="pt">'+tr+'</div></div>'+svg+'<div class="pl"><span>00:00</span><span>12:00</span><span>24:00</span></div><div class="phead">'+head+'</div><div class="pn">'+note+'</div>';
   return h+pctl()+'</div>';
 }
 function pctl(){return (pmsg?'<div class="pn">'+pesc(pmsg)+'</div>':'')+'<div class="prow"><input id="pc" type="text" placeholder="Другой город" autocomplete="off" aria-label="Город"><button class="pb" data-act="city">Найти</button></div>';}
 function paintPress(){var el=document.getElementById('pr');if(el)el.innerHTML=prHTML();}
 function loadPress(force){
-  if(!force&&press&&press.loc===ploc.lat+','+ploc.lon&&Date.now()-press.ts<30*60*1000)return;
-  var u='https://api.open-meteo.com/v1/forecast?latitude='+ploc.lat+'&longitude='+ploc.lon+'&hourly=surface_pressure&past_days=1&forecast_days=2&timezone=auto';
+  if(!force&&press&&press.t&&press.loc===ploc.lat+','+ploc.lon&&Date.now()-press.ts<30*60*1000)return;
+  var u='https://api.open-meteo.com/v1/forecast?latitude='+ploc.lat+'&longitude='+ploc.lon+'&hourly=surface_pressure&past_days=1&forecast_days=3&timezone=auto';
   fetch(u).then(function(r){return r.json();}).then(function(j){
     var t=j.hourly.time,v=j.hourly.surface_pressure,off=(j.utc_offset_seconds||0)*1000;
-    var nowLocal=new Date(Date.now()+off).toISOString().slice(0,13),n=0;
-    for(var i=0;i<t.length;i++){if(t[i].slice(0,13)<=nowLocal)n=i;}
-    var a=Math.max(0,n-24),b=Math.min(v.length,n+25);
-    press={v:v.slice(a,b),now:n-a,ts:Date.now(),loc:ploc.lat+','+ploc.lon};
+    var nl=new Date(Date.now()+off).toISOString();
+    press={t:t,v:v,td:nl.slice(0,10),nh:+nl.slice(11,13),ts:Date.now(),loc:ploc.lat+','+ploc.lon};
     try{localStorage.setItem(PKEY,JSON.stringify(press));}catch(e){}
     paintPress();
   }).catch(function(){paintPress();});
@@ -541,6 +557,7 @@ document.addEventListener('click',function(e){
   var a=el.getAttribute('data-act');
   if(a==='tab'){dayT=null;view=el.getAttribute('data-v');msg='';justAdded=null;editing=null;deleting=null;if(view==='home')heartAnim=true;window.scrollTo(0,0);render();}
   else if(a==='city'){setCity();}
+  else if(a==='pday'){pday=+el.getAttribute('data-d');paintPress();}
   else if(a==='openSheet'){sheet=true;msg='';justAdded=null;render();}
   else if(a==='closeSheet'){sheet=false;msg='';render();}
   else if(a==='day'){dayT=+el.getAttribute('data-t');msg='';justAdded=null;render();}
