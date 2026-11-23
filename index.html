@@ -131,10 +131,10 @@ button.cell:active{transform:scale(.92)}
 #root>.wfl{z-index:0}
 .wfl span{position:absolute;bottom:-50px;white-space:nowrap;font-family:'MarckS','Marck Script',cursive;font-weight:400;letter-spacing:.5px;opacity:0;animation:wfloat linear infinite;background:linear-gradient(120deg,#fbe3a6,#e8b95a 55%,#b98337);-webkit-background-clip:text;background-clip:text;-webkit-text-fill-color:transparent;filter:drop-shadow(0 0 7px rgba(235,192,112,.35))}
 .wfl span.r{background:linear-gradient(120deg,#ffc2d2,#ff7f9f 55%,#d83f6b);-webkit-background-clip:text;background-clip:text;filter:drop-shadow(0 0 7px rgba(255,111,150,.35))}
-.wfl span.hh{background:none;-webkit-background-clip:border-box;background-clip:border-box;-webkit-text-fill-color:initial;font-family:-apple-system,'SF Pro Text',system-ui,sans-serif;filter:drop-shadow(0 0 9px rgba(216,63,107,.55))}
+.wfl span.hh{background:none;-webkit-background-clip:border-box;background-clip:border-box;-webkit-text-fill-color:initial;font-family:-apple-system,'SF Pro Text',system-ui,sans-serif;filter:drop-shadow(0 0 10px rgba(168,33,75,.7)) brightness(1.08)}
 .wfl span.hh b{display:inline-block;font-weight:400;animation:hbeat 1.9s ease-in-out infinite}
 @keyframes hbeat{0%,100%{transform:scale(1)}15%{transform:scale(1.28)}30%{transform:scale(1)}45%{transform:scale(1.18)}60%{transform:scale(1)}}
-.wfl span.h::before{content:"♥ ";-webkit-text-fill-color:#d83f6b;font-style:normal;font-size:.8em}
+.wfl span.h::before{content:"♥ ";-webkit-text-fill-color:#a8214b;font-style:normal;font-size:.8em}
 @keyframes wfloat{0%{transform:translate(0,0) rotate(var(--wr));opacity:0}10%{opacity:.55}30%{transform:translate(calc(var(--sx)*.6),-30vh) rotate(calc(var(--wr)*-1))}55%{transform:translate(calc(var(--sx)*-.4),-62vh) rotate(var(--wr))}85%{opacity:.4}100%{transform:translate(calc(var(--sx)*.3),-115vh) rotate(calc(var(--wr)*-.6));opacity:0}}
 .ribbon{overflow:hidden;white-space:nowrap;border-top:1px solid var(--line);border-bottom:1px solid var(--line);padding:9px 0;margin:2px -18px;-webkit-mask-image:linear-gradient(90deg,transparent,#000 12%,#000 88%,transparent);mask-image:linear-gradient(90deg,transparent,#000 12%,#000 88%,transparent)}
 .ribbon .tr{display:inline-block;animation:rib 26s linear infinite;font-size:15px;font-weight:700;color:#f0c878;letter-spacing:.4px}
@@ -348,7 +348,7 @@ document.addEventListener('visibilitychange',function(){if(!document.hidden)load
 setInterval(function(){loadPress();},10*60*1000);
 
 var LOVE=['Ашкым','Котёнок','Дорогая','Жинка','Любимая','Дог','Моя безумная'];
-function wordsBG(){var h='',n=30;for(var i=0;i<n;i++){var w=LOVE[(i*5+(i>>2))%LOVE.length],big=(i%5===0),cls=(i%3===1?'r':'')+(w==='Ашкым'||w==='Дог'?' h':'');h+='<span class="'+cls+'" style="left:'+(1+(i*29)%90)+'%;font-size:'+(big?28+(i%3)*4:17+(i*5)%9)+'px;animation-duration:'+(22+(i*7)%16)+'s;animation-delay:'+(-(i*3.1))+'s;--wr:'+(((i%2)?1:-1)*(3+(i*3)%7))+'deg;--sx:'+(((i%2)?1:-1)*(14+(i*9)%34))+'px">'+w+'</span>';}var HC=['#b81c46','#d83f6b','#ff6f96','#8e1236','#e8b95a'];
+function wordsBG(){var h='',n=30;for(var i=0;i<n;i++){var w=LOVE[(i*5+(i>>2))%LOVE.length],big=(i%5===0),cls=(i%3===1?'r':'')+(w==='Ашкым'||w==='Дог'?' h':'');h+='<span class="'+cls+'" style="left:'+(1+(i*29)%90)+'%;font-size:'+(big?28+(i%3)*4:17+(i*5)%9)+'px;animation-duration:'+(22+(i*7)%16)+'s;animation-delay:'+(-(i*3.1))+'s;--wr:'+(((i%2)?1:-1)*(3+(i*3)%7))+'deg;--sx:'+(((i%2)?1:-1)*(14+(i*9)%34))+'px">'+w+'</span>';}var HC=['#8c1a3c','#a8214b','#b82a55','#7d1633','#9b1d45'];
   for(var k=0;k<18;k++){var sz=14+(k*7)%26;h+='<span class="hh" style="left:'+(3+(k*53)%92)+'%;font-size:'+sz+'px;color:'+HC[k%HC.length]+';animation-duration:'+(19+(k*5)%15)+'s;animation-delay:'+(-(k*2.3))+'s;--wr:'+(((k%2)?1:-1)*(5+(k*3)%8))+'deg;--sx:'+(((k%2)?-1:1)*(12+(k*11)%30))+'px"><b style="animation-delay:'+(-(k*0.37)).toFixed(2)+'s">♥</b></span>';}
   return '<div class="wfl" aria-hidden="true">'+h+'</div>';}
 function ribbonHTML(){var one='';LOVE.forEach(function(w){one+=w+'<i>♥</i>';});return '<div class="ribbon" aria-hidden="true"><div class="tr">'+one+one+one+one+'</div></div>';}
