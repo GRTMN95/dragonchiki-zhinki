@@ -104,6 +104,10 @@ button:focus-visible,input:focus-visible,summary:focus-visible{outline:3px solid
 .dow span{text-align:center;font-size:11px;font-weight:700;color:var(--muted);padding-bottom:4px}
 .cell{aspect-ratio:1/1;border-radius:13px;background:rgba(255,255,255,.04);display:flex;align-items:center;justify-content:center;font-size:15px;font-weight:600;font-variant-numeric:tabular-nums;border:1.5px solid transparent;min-height:38px}
 .cell.out{visibility:hidden}
+button.cell{font:inherit;font-size:15px;font-weight:600;color:inherit;cursor:pointer;padding:0;-webkit-tap-highlight-color:transparent;transition:transform .12s}
+button.cell:active{transform:scale(.92)}
+.cell.sel{outline:2px solid #fff;outline-offset:1px}
+.dstat{margin:10px 0 4px;font-size:17px;font-weight:700}.dsub{color:var(--muted);font-size:14px;margin-bottom:14px}
 .cell.p{background:linear-gradient(145deg,#ec5d86,#a82250);color:#fff;font-weight:800;box-shadow:0 4px 12px rgba(216,63,107,.35)}
 .cell.pp{border:1.5px dashed rgba(216,63,107,.8);color:#ffb3c6}
 .cell.fe{background:rgba(235,192,112,.2);color:#f7dca0;border-color:rgba(235,192,112,.35)}
@@ -224,7 +228,7 @@ try{var r=localStorage.getItem(KEY);if(r){var o=JSON.parse(r);if(Array.isArray(o
 try{if(!localStorage.getItem('dragon-seeded-v1')){localStorage.setItem('dragon-seeded-v1','1');if(!starts.length){starts=['2026-10-25'];localStorage.setItem(KEY,JSON.stringify(starts));}}}catch(e){if(!starts.length)starts=['2026-10-25'];}
 function save(){try{localStorage.setItem(KEY,JSON.stringify(starts));}catch(e){}}
 
-var view='home',sheet=false,heartAnim=true,editing=null,deleting=null,firstRender=true,calAnim='';
+var view='home',sheet=false,dayT=null,heartAnim=true,editing=null,deleting=null,firstRender=true,calAnim='';
 var now=new Date(),calY=now.getFullYear(),calM=now.getMonth(),msg='',justAdded=null;
 var PL=5,LUT=14,DEF=28;
 
@@ -388,7 +392,8 @@ function render(){
     var t=Date.UTC(calY,calM,d),cls='cell';
     if(c.period[t])cls+=' p';else if(c.ovs[t])cls+=' ov';else if(c.fert[t])cls+=' fe';else if(c.pred[t])cls+=' pp';
     if(t===T)cls+=' today';
-    h+='<div class="'+cls+'">'+d+'</div>';
+    if(t===dayT)cls+=' sel';
+    h+='<button type="button" class="'+cls+'" data-act="day" data-t="'+t+'" aria-label="'+d+' '+MONTHS[calM]+'">'+d+'</button>';
   }
   h+='</div><div class="legend"><span style="--c:var(--period)">месячные</span><span style="--c:rgba(235,192,112,.4)">фертильные дни</span><span style="--c:var(--ov)">овуляция</span></div></div>';
 
@@ -416,7 +421,23 @@ function render(){
   [['home','Главная'],['cal','Календарь'],['list','Месячные']].forEach(function(t){tb+='<button data-act="tab" data-v="'+t[0]+'"'+(view===t[0]?' aria-current="true"':'')+'>'+TI[t[0]]+'<span>'+t[1]+'</span></button>';});
   document.getElementById('tabbar').innerHTML=tb+'</div>';
   var sw='';
-  if(sheet){
+  if(dayT!==null){
+    var dt=dayT,ds=iso(dt),isStart=starts.indexOf(ds)>=0,st,note='',cd='';
+    var rw=c.rows.filter(function(r){return r.start<=dt&&dt<r.next;})[0];
+    if(rw)cd='День цикла: '+(Math.round((dt-rw.start)/DAY)+1)+'. ';
+    if(isStart)st='Начало месячных';
+    else if(c.period[dt])st='Месячные';
+    else if(c.pred[dt])st='Ожидаются месячные';
+    else if(c.ovs[dt])st='Примерный день овуляции';
+    else if(c.fert[dt])st='Фертильное окно';
+    else st='Обычный день';
+    if(dt>T)note='Это прогноз, он примерный. Записывать можно только прошедшие дни.';
+    else if(c.pred[dt]||c.ovs[dt]||c.fert[dt])note='Расчёт примерный и не подтверждает овуляцию.';
+    var acts='';
+    if(isStart)acts='<button class="main" data-act="dayEdit">Изменить дату</button><button class="link" data-act="dayDel">Удалить запись</button>';
+    else if(dt<=T)acts='<button class="main" data-act="dayAdd">Месячные начались в этот день</button>';
+    sw='<div class="scrim" data-act="closeDay"></div><div class="sheet" role="dialog" aria-modal="true" aria-label="День"><div class="grab"></div><h3>'+fmt(dt)+'</h3><div class="dstat">'+st+'</div><div class="dsub">'+cd+note+'</div><div class="actions">'+acts+'<button class="link" data-act="closeDay">Закрыть</button></div></div>';
+  } else if(sheet){
     var chipsS=[[0,'Сегодня'],[1,'Вчера'],[3,'3 дня назад'],[7,'Неделю назад']].map(function(x,ix){return '<button class="chip'+(ix===0?' on':'')+'" data-act="chip" data-off="'+x[0]+'">'+x[1]+'</button>';}).join('');
     sw='<div class="scrim" data-act="closeSheet"></div><div class="sheet" role="dialog" aria-modal="true" aria-label="Запись месячных"><div class="grab"></div><h3>Когда начались месячные?</h3><div class="sub" style="margin-top:4px">Выбери день и подтверди. Пока не нажмёшь «Записать», ничего не сохранится.</div><div class="chips">'+chipsS+'</div><input type="date" class="bigdate" id="d" value="'+iso(T)+'" aria-label="Дата начала месячных">'+(msg?'<div class="ok" style="margin-bottom:12px">'+msg+'</div>':'')+'<div class="actions"><button class="main" data-act="other">Записать</button><button class="link" data-act="closeSheet">Отмена</button></div></div>';
   }
@@ -437,10 +458,10 @@ function render(){
   if(calAnim){var cc=root.querySelector('.cells');if(cc){cc.parentNode.style.setProperty('--dx',calAnim==='next'?'24px':'-24px');cc.parentNode.classList.add('swap');}calAnim='';}
 }
 
-function add(dateStr){
+function add(dateStr,keep){
   if(!dateStr){msg='Выбери дату.';justAdded=null;render();return;}
   if(starts.indexOf(dateStr)>=0){msg='Эта дата уже записана.';justAdded=null;render();return;}
-  starts.push(dateStr);starts.sort();save();sheet=false;view='home';
+  starts.push(dateStr);starts.sort();save();sheet=false;dayT=null;if(!keep)view='home';
   heartAnim=true;justAdded=dateStr;msg='Записано: '+fmt(D(dateStr))+'. Прогноз обновлён ♥️';
   var t=D(dateStr);calY=new Date(t).getUTCFullYear();calM=new Date(t).getUTCMonth();
   render();window.scrollTo(0,0);
@@ -485,10 +506,14 @@ function popHearts(x,y){
 document.addEventListener('click',function(e){
   var el=e.target.closest('[data-act]');if(!el)return;
   var a=el.getAttribute('data-act');
-  if(a==='tab'){view=el.getAttribute('data-v');msg='';justAdded=null;editing=null;deleting=null;if(view==='home')heartAnim=true;window.scrollTo(0,0);render();}
+  if(a==='tab'){dayT=null;view=el.getAttribute('data-v');msg='';justAdded=null;editing=null;deleting=null;if(view==='home')heartAnim=true;window.scrollTo(0,0);render();}
   else if(a==='geo'){getGeo();}
   else if(a==='openSheet'){sheet=true;msg='';justAdded=null;render();}
   else if(a==='closeSheet'){sheet=false;msg='';render();}
+  else if(a==='day'){dayT=+el.getAttribute('data-t');msg='';justAdded=null;render();}
+  else if(a==='closeDay'){dayT=null;render();}
+  else if(a==='dayAdd'){var dd=iso(dayT);dayT=null;add(dd,true);}
+  else if(a==='dayEdit'||a==='dayDel'){var d2=iso(dayT);dayT=null;view='list';editing=a==='dayEdit'?d2:null;deleting=a==='dayDel'?d2:null;msg='';justAdded=null;render();}
   else if(a==='heart'){
     var sv=el.querySelector('svg.heart');if(sv){sv.classList.remove('tap');void sv.getBoundingClientRect();sv.classList.add('tap');setTimeout(function(){sv.classList.remove('tap');},700);}
     var px=(e.clientX||0),py=(e.clientY||0);
