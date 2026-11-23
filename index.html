@@ -273,6 +273,7 @@ var PKEY='dragon-pressure-v1',LKEY='dragon-loc-v1';
 var press=null,ploc={lat:55.75,lon:37.62,name:'Москва',own:false};
 try{press=JSON.parse(localStorage.getItem(PKEY)||'null');}catch(e){}
 try{var _l=JSON.parse(localStorage.getItem(LKEY)||'null');if(_l&&_l.lat)ploc=_l;}catch(e){}
+function esc(x){return pesc(x);}
 function pesc(x){return String(x).replace(/[&<>"]/g,function(c){return{'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c];});}
 function prHTML(){
   var h='<div class="card pcard"><div class="k">Атмосферное давление · '+pesc(ploc.own?'у вас':ploc.name)+'</div>';
