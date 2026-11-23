@@ -128,9 +128,10 @@ button.cell:active{transform:scale(.92)}
 .wfl{position:fixed;inset:0;pointer-events:none;overflow:hidden;z-index:0}
 #root{position:relative;z-index:1}
 #root>.wfl{z-index:0}
-.wfl span{position:absolute;bottom:-40px;white-space:nowrap;font-weight:700;letter-spacing:.3px;opacity:0;animation:wfloat linear infinite;color:#e9bf72;text-shadow:0 0 12px rgba(235,192,112,.25)}
-.wfl span.r{color:#ff8fae}
-@keyframes wfloat{0%{transform:translateY(0) rotate(var(--wr));opacity:0}10%{opacity:.32}85%{opacity:.22}100%{transform:translateY(-112vh) rotate(var(--wr));opacity:0}}
+.wfl span{position:absolute;bottom:-50px;white-space:nowrap;font-family:'New York',ui-serif,Georgia,'Times New Roman',serif;font-style:italic;font-weight:600;letter-spacing:.4px;opacity:0;animation:wfloat linear infinite;background:linear-gradient(120deg,#fbe3a6,#e8b95a 55%,#b98337);-webkit-background-clip:text;background-clip:text;-webkit-text-fill-color:transparent;filter:drop-shadow(0 0 7px rgba(235,192,112,.35))}
+.wfl span.r{background:linear-gradient(120deg,#ffc2d2,#ff7f9f 55%,#d83f6b);-webkit-background-clip:text;background-clip:text;filter:drop-shadow(0 0 7px rgba(255,111,150,.35))}
+.wfl span.h::before{content:"♥ ";-webkit-text-fill-color:#d83f6b;font-style:normal;font-size:.8em}
+@keyframes wfloat{0%{transform:translate(0,0) rotate(var(--wr));opacity:0}10%{opacity:.55}30%{transform:translate(calc(var(--sx)*.6),-30vh) rotate(calc(var(--wr)*-1))}55%{transform:translate(calc(var(--sx)*-.4),-62vh) rotate(var(--wr))}85%{opacity:.4}100%{transform:translate(calc(var(--sx)*.3),-115vh) rotate(calc(var(--wr)*-.6));opacity:0}}
 .ribbon{overflow:hidden;white-space:nowrap;border-top:1px solid var(--line);border-bottom:1px solid var(--line);padding:9px 0;margin:2px -18px;-webkit-mask-image:linear-gradient(90deg,transparent,#000 12%,#000 88%,transparent);mask-image:linear-gradient(90deg,transparent,#000 12%,#000 88%,transparent)}
 .ribbon .tr{display:inline-block;animation:rib 26s linear infinite;font-size:15px;font-weight:700;color:#f0c878;letter-spacing:.4px}
 .ribbon .tr i{font-style:normal;color:#d83f6b;margin:0 12px}
@@ -343,7 +344,7 @@ document.addEventListener('visibilitychange',function(){if(!document.hidden)load
 setInterval(function(){loadPress();},10*60*1000);
 
 var LOVE=['Ашкым','котёнок','Дорогая','жинка','любимая','дог','моя безумная'];
-function wordsBG(){var h='';for(var i=0;i<22;i++){var w=LOVE[(i*3)%LOVE.length];h+='<span class="'+(i%3===1?'r':'')+'" style="left:'+(2+(i*37)%88)+'%;font-size:'+(12+(i*5)%9)+'px;animation-duration:'+(16+(i*4)%11)+'s;animation-delay:'+(-(i*2.7))+'s;--wr:'+(((i%2)?1:-1)*(4+(i*3)%9))+'deg">'+w+'</span>';}return '<div class="wfl" aria-hidden="true">'+h+'</div>';}
+function wordsBG(){var h='',n=30;for(var i=0;i<n;i++){var w=LOVE[(i*5+(i>>2))%LOVE.length],big=(i%5===0),cls=(i%3===1?'r':'')+(w==='Ашкым'||w==='дог'?' h':'');h+='<span class="'+cls+'" style="left:'+(1+(i*29)%90)+'%;font-size:'+(big?22+(i%3)*3:13+(i*5)%8)+'px;animation-duration:'+(22+(i*7)%16)+'s;animation-delay:'+(-(i*3.1))+'s;--wr:'+(((i%2)?1:-1)*(3+(i*3)%7))+'deg;--sx:'+(((i%2)?1:-1)*(14+(i*9)%34))+'px">'+w+'</span>';}return '<div class="wfl" aria-hidden="true">'+h+'</div>';}
 function ribbonHTML(){var one='';LOVE.forEach(function(w){one+=w+'<i>♥</i>';});return '<div class="ribbon" aria-hidden="true"><div class="tr">'+one+one+one+one+'</div></div>';}
 function wordCardHTML(){return '<div class="card wordcard"><div class="wl">Ты для меня</div><div class="wc">'+LOVE.map(function(w){return '<span>'+w+'</span>';}).join('')+'</div></div>';}
 function headerHTML(){
@@ -435,7 +436,7 @@ function render(){
   var cta='<button class="main" data-act="openSheet">Отметить начало месячных</button>';
   if(view==='cal')h+=banner+calHTML;
   else if(view==='list')h+=banner+listHTML+'<button class="main" data-act="openSheet">Добавить запись</button><div class="foot">С любовью ♥️</div>';
-  else h+=wordsBG()+heroH+ribbonHTML()+cta+banner+cardsHTML+'<div id="pr">'+prHTML()+'</div>'+wordCardHTML()+'<div class="foot">С любовью ♥️</div>';
+  else h+=wordsBG()+heroH+cta+banner+cardsHTML+'<div id="pr">'+prHTML()+'</div>'+'<div class="foot">С любовью ♥️</div>';
 
   var root=document.getElementById('root');
   root.innerHTML=h;
