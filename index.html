@@ -300,11 +300,11 @@ function heartSVG(day,L,mode,anim,hd,custom){
 var PKEY='dragon-pressure-v2',LKEY='dragon-loc-v1';
 var pmsg='',press=null,ploc={lat:55.75,lon:37.62,name:'Москва',own:false};
 try{press=JSON.parse(localStorage.getItem(PKEY)||'null');}catch(e){}
-try{var _l=JSON.parse(localStorage.getItem(LKEY)||'null');if(_l&&_l.lat)ploc=_l;}catch(e){}
+try{var _l=JSON.parse(localStorage.getItem(LKEY)||'null');if(_l&&_l.lat&&!_l.own)ploc=_l;}catch(e){}
 function esc(x){return pesc(x);}
 function pesc(x){return String(x).replace(/[&<>"]/g,function(c){return{'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c];});}
 function prHTML(){
-  var h='<div class="card pcard"><div class="k">Атмосферное давление · '+pesc(ploc.own?'у вас':ploc.name)+'</div>';
+  var h='<div class="card pcard"><div class="k">Атмосферное давление · '+pesc(ploc.name)+'</div>';
   if(!press||!press.v||!press.v.length){return h+'<div class="pn">'+(navigator.onLine===false?'Нет интернета — покажу, когда появится.':'Загружаю…')+'</div>'+pctl()+'</div>';}
   var v=press.v,n=press.now,cur=v[n],mm=Math.round(cur*0.750062);
   var back=v[Math.max(0,n-3)],fwd=v[Math.min(v.length-1,n+6)];
@@ -322,7 +322,7 @@ function prHTML(){
   h+='<div class="ph"><div class="pv">'+mm+'<small>мм рт. ст.</small></div><div class="pt">'+tr+'</div></div>'+svg+'<div class="pl"><span>вчера</span><span>сейчас</span><span>завтра</span></div><div class="pn">'+note+'</div>';
   return h+pctl()+'</div>';
 }
-function pctl(){return (pmsg?'<div class="pn">'+pesc(pmsg)+'</div>':'')+'<button class="pb" data-act="geo">📍 Моё местоположение</button><div class="prow"><input id="pc" type="text" placeholder="Другой город" autocomplete="off" aria-label="Город"><button class="pb" data-act="city">Найти</button></div>';}
+function pctl(){return (pmsg?'<div class="pn">'+pesc(pmsg)+'</div>':'')+'<div class="prow"><input id="pc" type="text" placeholder="Другой город" autocomplete="off" aria-label="Город"><button class="pb" data-act="city">Найти</button></div>';}
 function paintPress(){var el=document.getElementById('pr');if(el)el.innerHTML=prHTML();}
 function loadPress(force){
   if(!force&&press&&press.loc===ploc.lat+','+ploc.lon&&Date.now()-press.ts<30*60*1000)return;
@@ -346,15 +346,6 @@ function setCity(){
     try{localStorage.setItem(LKEY,JSON.stringify(ploc));}catch(e){}
     paintPress();loadPress(true);
   }).catch(function(){pmsg='Нет связи. Попробуйте позже.';paintPress();});
-}
-function getGeo(){
-  if(!navigator.geolocation){pmsg='Геолокация недоступна. Введите город ниже.';paintPress();return;}
-  pmsg='Определяю место… Разрешите доступ, когда iPhone спросит.';paintPress();
-  navigator.geolocation.getCurrentPosition(function(p){
-    ploc={lat:Math.round(p.coords.latitude*100)/100,lon:Math.round(p.coords.longitude*100)/100,name:'моё место',own:true};pmsg='';
-    try{localStorage.setItem(LKEY,JSON.stringify(ploc));}catch(e){}
-    loadPress(true);
-  },function(e){pmsg=e&&e.code===1?'Доступ к геолокации закрыт. Включите: Настройки → Конфиденциальность → Службы геолокации → Safari. Или введите город ниже.':'Не удалось определить место. Введите город ниже.';paintPress();},{timeout:15000,maximumAge:600000,enableHighAccuracy:false});
 }
 document.addEventListener('visibilitychange',function(){if(!document.hidden)loadPress();});
 setInterval(function(){loadPress();},10*60*1000);
@@ -549,7 +540,6 @@ document.addEventListener('click',function(e){
   var el=e.target.closest('[data-act]');if(!el)return;
   var a=el.getAttribute('data-act');
   if(a==='tab'){dayT=null;view=el.getAttribute('data-v');msg='';justAdded=null;editing=null;deleting=null;if(view==='home')heartAnim=true;window.scrollTo(0,0);render();}
-  else if(a==='geo'){getGeo();}
   else if(a==='city'){setCity();}
   else if(a==='openSheet'){sheet=true;msg='';justAdded=null;render();}
   else if(a==='closeSheet'){sheet=false;msg='';render();}
