@@ -41,6 +41,7 @@ h2{font-size:12px;font-weight:700;letter-spacing:.16em;text-transform:uppercase;
 .pcard .pt{font-size:15px;font-weight:700}
 .pcard svg.spark{width:100%;height:74px;display:block;margin-top:10px}
 .pcard .pl{display:flex;justify-content:space-between;font-size:12px;opacity:.65;margin-top:2px}
+.pcard .prow{display:flex;gap:8px;margin-top:10px}.pcard .prow input{flex:1;min-width:0;background:rgba(0,0,0,.25);border:1px solid var(--line);border-radius:12px;color:inherit;font:inherit;font-size:16px;padding:8px 10px;-webkit-appearance:none}.pcard .prow .pb{margin-top:0}
 .pcard .pn{font-size:13px;opacity:.8;margin-top:8px;line-height:1.35}
 .pcard .pb{margin-top:10px;background:none;border:1px solid var(--line);color:inherit;border-radius:12px;padding:6px 10px;font:inherit;font-size:12px;opacity:.8}
 .card{background:var(--surface);border:1px solid var(--line);border-radius:24px;padding:18px;backdrop-filter:blur(16px);-webkit-backdrop-filter:blur(16px);box-shadow:0 12px 34px rgba(0,0,0,.28),inset 0 1px 0 rgba(255,255,255,.08)}
@@ -296,15 +297,15 @@ function heartSVG(day,L,mode,anim,hd,custom){
 }
 
 /* ===== атмосферное давление (Open-Meteo, обновляется само) ===== */
-var PKEY='dragon-pressure-v1',LKEY='dragon-loc-v1';
-var press=null,ploc={lat:55.75,lon:37.62,name:'Москва',own:false};
+var PKEY='dragon-pressure-v2',LKEY='dragon-loc-v1';
+var pmsg='',press=null,ploc={lat:55.75,lon:37.62,name:'Москва',own:false};
 try{press=JSON.parse(localStorage.getItem(PKEY)||'null');}catch(e){}
 try{var _l=JSON.parse(localStorage.getItem(LKEY)||'null');if(_l&&_l.lat)ploc=_l;}catch(e){}
 function esc(x){return pesc(x);}
 function pesc(x){return String(x).replace(/[&<>"]/g,function(c){return{'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c];});}
 function prHTML(){
   var h='<div class="card pcard"><div class="k">Атмосферное давление · '+pesc(ploc.own?'у вас':ploc.name)+'</div>';
-  if(!press||!press.v||!press.v.length){return h+'<div class="pn">'+(navigator.onLine===false?'Нет интернета — покажу, когда появится.':'Загружаю…')+'</div></div>';}
+  if(!press||!press.v||!press.v.length){return h+'<div class="pn">'+(navigator.onLine===false?'Нет интернета — покажу, когда появится.':'Загружаю…')+'</div>'+pctl()+'</div>';}
   var v=press.v,n=press.now,cur=v[n],mm=Math.round(cur*0.750062);
   var back=v[Math.max(0,n-3)],fwd=v[Math.min(v.length-1,n+6)];
   var dB=(cur-back)*0.750062,dF=(fwd-cur)*0.750062;
@@ -319,15 +320,15 @@ function prHTML(){
   var nx=pts[n][0],ny=pts[n][1];
   var svg='<svg class="spark" viewBox="0 0 '+w+' '+hh+'" preserveAspectRatio="none" aria-hidden="true"><defs><linearGradient id="pg" x1="0" x2="0" y1="0" y2="1"><stop offset="0" stop-color="#f0c878" stop-opacity=".35"/><stop offset="1" stop-color="#f0c878" stop-opacity="0"/></linearGradient></defs><path d="'+d+' L'+w+' '+hh+' L0 '+hh+'Z" fill="url(#pg)"/><path d="'+d+'" fill="none" stroke="#f0c878" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" vector-effect="non-scaling-stroke"/><line x1="'+nx+'" x2="'+nx+'" y1="0" y2="'+hh+'" stroke="#fff" stroke-opacity=".35" stroke-dasharray="3 3" vector-effect="non-scaling-stroke"/></svg>';
   h+='<div class="ph"><div class="pv">'+mm+'<small>мм рт. ст.</small></div><div class="pt">'+tr+'</div></div>'+svg+'<div class="pl"><span>вчера</span><span>сейчас</span><span>завтра</span></div><div class="pn">'+note+'</div>';
-  h+='<button class="pb" data-act="geo">'+(ploc.own?'Обновить моё местоположение':'Показать для моего места')+'</button></div>';
-  return h;
+  return h+pctl()+'</div>';
 }
+function pctl(){return (pmsg?'<div class="pn">'+pesc(pmsg)+'</div>':'')+'<button class="pb" data-act="geo">📍 Моё местоположение</button><div class="prow"><input id="pc" type="text" placeholder="Другой город" autocomplete="off" aria-label="Город"><button class="pb" data-act="city">Найти</button></div>';}
 function paintPress(){var el=document.getElementById('pr');if(el)el.innerHTML=prHTML();}
 function loadPress(force){
   if(!force&&press&&press.loc===ploc.lat+','+ploc.lon&&Date.now()-press.ts<30*60*1000)return;
-  var u='https://api.open-meteo.com/v1/forecast?latitude='+ploc.lat+'&longitude='+ploc.lon+'&hourly=pressure_msl&past_days=1&forecast_days=2&timezone=auto';
+  var u='https://api.open-meteo.com/v1/forecast?latitude='+ploc.lat+'&longitude='+ploc.lon+'&hourly=surface_pressure&past_days=1&forecast_days=2&timezone=auto';
   fetch(u).then(function(r){return r.json();}).then(function(j){
-    var t=j.hourly.time,v=j.hourly.pressure_msl,off=(j.utc_offset_seconds||0)*1000;
+    var t=j.hourly.time,v=j.hourly.surface_pressure,off=(j.utc_offset_seconds||0)*1000;
     var nowLocal=new Date(Date.now()+off).toISOString().slice(0,13),n=0;
     for(var i=0;i<t.length;i++){if(t[i].slice(0,13)<=nowLocal)n=i;}
     var a=Math.max(0,n-24),b=Math.min(v.length,n+25);
@@ -336,13 +337,24 @@ function loadPress(force){
     paintPress();
   }).catch(function(){paintPress();});
 }
+function setCity(){
+  var el=document.getElementById('pc'),q=el&&el.value.trim();if(!q){pmsg='Введите название города.';paintPress();return;}
+  pmsg='Ищу город…';paintPress();
+  fetch('https://geocoding-api.open-meteo.com/v1/search?count=1&language=ru&name='+encodeURIComponent(q)).then(function(r){return r.json();}).then(function(j){
+    var r0=j.results&&j.results[0];if(!r0){pmsg='Город не найден. Проверьте название.';paintPress();return;}
+    ploc={lat:r0.latitude,lon:r0.longitude,name:r0.name,own:false};pmsg='';
+    try{localStorage.setItem(LKEY,JSON.stringify(ploc));}catch(e){}
+    paintPress();loadPress(true);
+  }).catch(function(){pmsg='Нет связи. Попробуйте позже.';paintPress();});
+}
 function getGeo(){
-  if(!navigator.geolocation){return;}
+  if(!navigator.geolocation){pmsg='Геолокация недоступна. Введите город ниже.';paintPress();return;}
+  pmsg='Определяю место… Разрешите доступ, когда iPhone спросит.';paintPress();
   navigator.geolocation.getCurrentPosition(function(p){
-    ploc={lat:Math.round(p.coords.latitude*100)/100,lon:Math.round(p.coords.longitude*100)/100,name:'моё место',own:true};
+    ploc={lat:Math.round(p.coords.latitude*100)/100,lon:Math.round(p.coords.longitude*100)/100,name:'моё место',own:true};pmsg='';
     try{localStorage.setItem(LKEY,JSON.stringify(ploc));}catch(e){}
     loadPress(true);
-  },function(){},{timeout:10000,maximumAge:3600000});
+  },function(e){pmsg=e&&e.code===1?'Доступ к геолокации закрыт. Включите: Настройки → Конфиденциальность → Службы геолокации → Safari. Или введите город ниже.':'Не удалось определить место. Введите город ниже.';paintPress();},{timeout:15000,maximumAge:600000,enableHighAccuracy:false});
 }
 document.addEventListener('visibilitychange',function(){if(!document.hidden)loadPress();});
 setInterval(function(){loadPress();},10*60*1000);
@@ -538,6 +550,7 @@ document.addEventListener('click',function(e){
   var a=el.getAttribute('data-act');
   if(a==='tab'){dayT=null;view=el.getAttribute('data-v');msg='';justAdded=null;editing=null;deleting=null;if(view==='home')heartAnim=true;window.scrollTo(0,0);render();}
   else if(a==='geo'){getGeo();}
+  else if(a==='city'){setCity();}
   else if(a==='openSheet'){sheet=true;msg='';justAdded=null;render();}
   else if(a==='closeSheet'){sheet=false;msg='';render();}
   else if(a==='day'){dayT=+el.getAttribute('data-t');msg='';justAdded=null;render();}
